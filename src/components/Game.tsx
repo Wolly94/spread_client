@@ -3,7 +3,7 @@ interface GameProps {
 }
 
 const Game: React.FC<GameProps> = (props) => {
-    return <div></div>
+    return <div>gameeee</div>
 }
 
 export default Game

@@ -26,7 +26,7 @@ const useStyles = makeStyles({
 })
 
 interface FindGameProps {
-    onSetGameId: (gameId: string) => void
+    onSetSocketUrl: (socketUrl: string) => void
 }
 
 const FindGame: React.FC<FindGameProps> = (props) => {
@@ -40,8 +40,8 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             if (isApiError(resp)) {
                 enqueueSnackbar(resp.errorMessage, { variant: 'error' })
             } else {
-                gameProvider.setGameId(resp.id)
-                props.onSetGameId(resp.id)
+                gameProvider.setupGame(resp.id, resp.url)
+                props.onSetSocketUrl(resp.url)
             }
             setSubmitting(false)
         },

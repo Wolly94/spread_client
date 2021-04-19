@@ -5,6 +5,7 @@ export interface CreateGameBody {}
 
 export interface CreateGameResponse {
     id: string
+    url: string
 }
 
 export const createGameRequest = () => {
@@ -20,9 +21,6 @@ export interface GetGameStateResponse {
     gameServerUrl: string
 }
 
-export const getGameState = (gameId: string) => {
-    return apiRequest<GetGameStateResponse>(
-        API_PATH.getGameState + '/' + gameId,
-        HttpVerb.GET,
-    )
+export const getGameState = (gameServerUrl: string) => {
+    return apiRequest<GetGameStateResponse>(gameServerUrl, HttpVerb.GET)
 }

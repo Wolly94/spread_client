@@ -21,7 +21,7 @@ const headers = () => {
         return { 'Content-Type': 'text/plain' }
     } else {
         return {
-            'Content-Type': 'text/plain',
+            'Content-Type': 'application/json',
             Authorization: 'Basic ' + authProvider.getToken(),
         }
     }

@@ -29,10 +29,19 @@ const useStyles = makeStyles({
 
 interface AppProps {}
 
+const createAndConnectGameWebSocket = (url: string) => {
+    const ws = new WebSocket(url)
+    ws.onopen = () => {
+        console.log('Now connected')
+    }
+    return ws
+}
+
 function App() {
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())
-    const [gameId, setGameId] = useState(gameProvider.getGameId())
+    const [socketUrl, setSocketUrl] = useState(gameProvider.getSocketUrl())
+    const [gameSocket, setGameSocket] = useState<WebSocket | null>(null)
 
     useEffect(() => {
         if (token == null) {
@@ -42,9 +51,20 @@ function App() {
         }
     }, [])
 
+    useEffect(() => {
+        if (socketUrl != null) {
+            const socket = createAndConnectGameWebSocket(socketUrl)
+            setGameSocket(socket)
+        }
+    }, [socketUrl])
+
     const subView = () => {
-        if (gameId == null) {
-            return <FindGame onSetGameId={(id) => setGameId(id)}></FindGame>
+        if (gameSocket == null) {
+            return (
+                <FindGame
+                    onSetSocketUrl={(url) => setSocketUrl(url)}
+                ></FindGame>
+            )
         } else {
         }
     }
