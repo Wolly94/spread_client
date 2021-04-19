@@ -44,7 +44,7 @@ export const apiRequest = <T,>(
         })
         .catch((error) => {
             //console.log(error.response)
-            var err: ApiError = { errorMessage: error.response }
+            var err: ApiError = { errorMessage: error.message }
             return err
         })
 }
