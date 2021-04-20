@@ -4,7 +4,6 @@ const gameUrl = 'game-url'
 const gameProvider = {
     getGameId: () => {
         const x = localStorage.getItem(gameIdentifier)
-        if (x == undefined) return null
         return x
     },
     setupGame: (gameId: string, socketUrl: string) => {
@@ -13,7 +12,6 @@ const gameProvider = {
     },
     getSocketUrl: () => {
         const x = localStorage.getItem(gameUrl)
-        if (x == undefined) return null
         return x
     },
     clear: () => {

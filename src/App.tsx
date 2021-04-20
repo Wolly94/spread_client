@@ -7,6 +7,8 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core'
 import gameProvider from './game/gameProvider'
 import FindGame from './components/FindGame'
+import Game from './components/Game'
+import SpreadGameClient from './game/gameClient'
 
 const useStyles = makeStyles({
     startGameButton: {
@@ -29,43 +31,56 @@ const useStyles = makeStyles({
 
 interface AppProps {}
 
-const createAndConnectGameWebSocket = (url: string) => {
-    const ws = new WebSocket(url)
+const createAndConnectGameWebSocket = (
+    url: string,
+    playerToken: string,
+    onClose: () => void,
+) => {
+    const ws = new WebSocket(url + '?token=' + playerToken)
     ws.onopen = () => {
         console.log('Now connected')
+    }
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+        // TODO react
+    }
+    ws.onclose = () => {
+        onClose()
     }
     return ws
 }
 
 function App() {
+    //gameProvider.clear()
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())
-    const [socketUrl, setSocketUrl] = useState(gameProvider.getSocketUrl())
-    const [gameSocket, setGameSocket] = useState<WebSocket | null>(null)
+    const [
+        spreadGameClient,
+        setSpreadGameClient,
+    ] = useState<SpreadGameClient | null>(null)
 
     useEffect(() => {
         if (token == null) {
+            gameProvider.clear()
             requestToken().then((res) => {
                 if (!isApiError(res)) setToken(res.token)
             })
         }
     }, [])
 
-    useEffect(() => {
-        if (socketUrl != null) {
-            const socket = createAndConnectGameWebSocket(socketUrl)
-            setGameSocket(socket)
-        }
-    }, [socketUrl])
-
     const subView = () => {
-        if (gameSocket == null) {
+        if (token == null) {
+            return <label>Retrieving token ...</label>
+        } else if (spreadGameClient == null) {
             return (
                 <FindGame
-                    onSetSocketUrl={(url) => setSocketUrl(url)}
+                    onSetSocketUrl={(url) => {
+                        setSpreadGameClient(new SpreadGameClient(url, token))
+                    }}
                 ></FindGame>
             )
         } else {
+            return <Game spreadGameClient={spreadGameClient}></Game>
         }
     }
 
