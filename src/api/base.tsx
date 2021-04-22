@@ -76,6 +76,6 @@ export const useApiRequest = <T,>(
         return () => {
             source.cancel('Component got unmounted')
         }
-    }, [])
+    })
     return result
 }

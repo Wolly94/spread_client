@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import Button from '@material-ui/core/Button'
+import { useEffect, useState } from 'react'
 import requestToken from './api/Token'
 import authProvider from './auth/authProvider'
 import { isApiError } from './api/base'
@@ -9,6 +8,7 @@ import gameProvider from './game/gameProvider'
 import FindGame from './components/FindGame'
 import Game from './components/Game'
 import SpreadGameClient from './game/gameClient'
+import React from 'react'
 
 const useStyles = makeStyles({
     startGameButton: {
@@ -31,26 +31,7 @@ const useStyles = makeStyles({
 
 interface AppProps {}
 
-const createAndConnectGameWebSocket = (
-    url: string,
-    playerToken: string,
-    onClose: () => void,
-) => {
-    const ws = new WebSocket(url + '?token=' + playerToken)
-    ws.onopen = () => {
-        console.log('Now connected')
-    }
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        // TODO react
-    }
-    ws.onclose = () => {
-        onClose()
-    }
-    return ws
-}
-
-function App() {
+const App: React.FC<AppProps> = (props) => {
     //gameProvider.clear()
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())
@@ -66,7 +47,7 @@ function App() {
                 if (!isApiError(res)) setToken(res.token)
             })
         }
-    }, [])
+    })
 
     const subView = () => {
         if (token == null) {

@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import authProvider from '../auth/authProvider'
-import { apiRequest, HttpVerb, useApiRequest } from './base'
+import { apiRequest, HttpVerb } from './base'
 import API_PATH from './urls'
 
 interface TokenResponse {

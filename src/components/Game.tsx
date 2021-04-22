@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import SpreadGameClient from '../game/gameClient'
 
 interface GameProps {

@@ -1,5 +1,3 @@
-import { waitFor } from '@testing-library/dom'
-
 class SpreadGameClient {
     socket: WebSocket
     token: string
@@ -30,7 +28,7 @@ class SpreadGameClient {
 
     waitForSocketConnection(callback: () => void) {
         setTimeout(() => {
-            if (this.socket.readyState == WebSocket.OPEN) {
+            if (this.socket.readyState === WebSocket.OPEN) {
                 callback()
             } else {
                 this.waitForSocketConnection(callback)
