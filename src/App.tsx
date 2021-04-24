@@ -56,6 +56,7 @@ const App: React.FC<AppProps> = (props) => {
         } else if (gameSocketUrl == null) {
             return (
                 <FindGame
+                    token={token}
                     onSetSocketUrl={(url) => {
                         gameProvider.setSocketUrl(url)
                         setGameSocketUrl(url)

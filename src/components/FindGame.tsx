@@ -1,10 +1,16 @@
 import { Button, makeStyles } from '@material-ui/core'
 import { useFormik } from 'formik'
 import { useSnackbar } from 'notistack'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { isApiError } from '../api/base'
 import { createGameRequest } from '../api/game'
 import gameProvider from '../game/gameProvider'
+import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
+import FindGameServerMessage, {
+    OpenGame,
+} from '../shared/findGame/findGameServerMessages'
+import SocketClient from '../socketClients/socketClient'
+import OpenGameFC from './OpenGame'
 
 const useStyles = makeStyles({
     startGameButton: {
@@ -27,12 +33,32 @@ const useStyles = makeStyles({
 
 interface FindGameProps {
     onSetSocketUrl: (socketUrl: string) => void
+    token: string
 }
 
 const FindGame: React.FC<FindGameProps> = (props) => {
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-    const findGameClient = useRef(null)
+    const findGameClient = useRef<SocketClient<
+        FindGameServerMessage,
+        FindGameClientMessageData
+    > | null>(null)
+
+    const [openGames, setOpenGames] = useState<OpenGame[] | null>(null)
+
+    useEffect(() => {
+        const findGameSocketUrl = '' // TODO make http request to normal server
+        findGameClient.current = new SocketClient(
+            findGameSocketUrl,
+            props.token,
+        )
+        const onMessageReceive = (message: FindGameServerMessage) => {
+            if (message.type === 'opengames') {
+                setOpenGames(message.data)
+            }
+        }
+        findGameClient.current.setReceiver(onMessageReceive)
+    }, [props.token])
 
     const formik = useFormik({
         initialValues: {},
@@ -49,6 +75,16 @@ const FindGame: React.FC<FindGameProps> = (props) => {
     })
     return (
         <form onSubmit={formik.handleSubmit}>
+            {openGames != null && {
+                ...openGames?.map((openGame, index) => {
+                    return (
+                        <OpenGameFC
+                            openGame={openGame}
+                            key={index}
+                        ></OpenGameFC>
+                    )
+                }),
+            }}
             <label htmlFor="gameId"></label>
             <Button
                 type="submit"
