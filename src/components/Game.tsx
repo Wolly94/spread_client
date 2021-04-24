@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { ClientMessageData, SendUnits } from '../shared/clientMessages'
+import GameClientMessageData, {
+    SendUnits,
+} from '../shared/inGame/gameClientMessages'
 import {
     ClientBubble,
     ClientCell,
     ClientGameState,
-} from '../shared/clientState'
-import ServerMessage from '../shared/serverMessages'
+} from '../shared/inGame/clientGameState'
+import GameServerMessage from '../shared/inGame/gameServerMessages'
 import SocketClient from '../socketClients/socketClient'
 
 interface GameProps {
@@ -15,8 +17,8 @@ interface GameProps {
 
 const Game: React.FC<GameProps> = (props) => {
     const spreadGameClient = useRef<SocketClient<
-        ServerMessage,
-        ClientMessageData
+        GameServerMessage,
+        GameClientMessageData
     > | null>(null)
     const [
         clientGameState,
@@ -36,7 +38,7 @@ const Game: React.FC<GameProps> = (props) => {
             props.gameSocketUrl,
             props.token,
         )
-        const onMessageReceive = (message: ServerMessage) => {
+        const onMessageReceive = (message: GameServerMessage) => {
             //console.log('message received: ', message)
             if (message.type === 'gamestate') {
                 setClientGameData(message.data)

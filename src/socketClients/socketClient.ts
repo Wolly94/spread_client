@@ -1,7 +1,4 @@
-interface ClientMessage<TMessageData> {
-    token: string
-    data: TMessageData
-}
+import ClientMessage from '../shared/clientMessage'
 
 class SocketClient<TReceiveMessage, TSenderMessageData> {
     socket: WebSocket

@@ -1,7 +1,7 @@
 import { Button, makeStyles } from '@material-ui/core'
 import { useFormik } from 'formik'
 import { useSnackbar } from 'notistack'
-import React from 'react'
+import React, { useRef } from 'react'
 import { isApiError } from '../api/base'
 import { createGameRequest } from '../api/game'
 import gameProvider from '../game/gameProvider'
@@ -32,6 +32,7 @@ interface FindGameProps {
 const FindGame: React.FC<FindGameProps> = (props) => {
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+    const findGameClient = useRef(null)
 
     const formik = useFormik({
         initialValues: {},
