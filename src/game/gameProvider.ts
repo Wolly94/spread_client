@@ -10,6 +10,9 @@ const gameProvider = {
         localStorage.setItem(gameIdentifier, gameId)
         localStorage.setItem(gameUrl, socketUrl)
     },
+    setSocketUrl: (socketUrl: string) => {
+        localStorage.setItem(gameUrl, socketUrl)
+    },
     getSocketUrl: () => {
         const x = localStorage.getItem(gameUrl)
         return x

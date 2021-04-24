@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
-import SpreadGameClient from '../game/gameClient'
-import ClientMessage, {
-    ClientMessageData,
-    SendUnits,
-} from '../shared/clientMessages'
+import { ClientMessageData, SendUnits } from '../shared/clientMessages'
 import {
     ClientBubble,
     ClientCell,
     ClientGameState,
 } from '../shared/clientState'
 import ServerMessage from '../shared/serverMessages'
+import SocketClient from '../socketClients/socketClient'
 
 interface GameProps {
-    spreadGameClient: SpreadGameClient
+    token: string
+    gameSocketUrl: string
 }
 
 const Game: React.FC<GameProps> = (props) => {
+    const spreadGameClient = useRef<SocketClient<
+        ServerMessage,
+        ClientMessageData
+    > | null>(null)
     const [
         clientGameState,
         setClientGameData,
@@ -28,63 +30,85 @@ const Game: React.FC<GameProps> = (props) => {
     const [selectedCellIds, setSelectedCellIds] = useState<number[]>([])
     const [mouseDown, setMouseDown] = useState(false)
 
-    const cellBelowCursor = (x: number, y: number): ClientCell | null => {
-        if (clientGameState == null) return null
-        const found = clientGameState.cells.filter(
-            (cell) =>
-                (cell.position[0] - x) ** 2 + (cell.position[1] - y) ** 2 <=
-                cell.radius ** 2,
-        )
-        if (found.length > 0) return found[0]
-        else return null
-    }
-
-    const onMouseDown = (x: number, y: number) => {
-        console.log(x, y)
-        const cell = cellBelowCursor(x, y)
-        if (cell != null && cell.playerId === playerId) {
-            setMouseDown(true)
-            setSelectedCellIds([cell.id])
-            console.log('SELECTED')
-        } else {
-            setSelectedCellIds([])
-        }
-    }
-
-    const onMouseMove = (x: number, y: number) => {
-        if (mouseDown && selectedCellIds.length > 0) {
-            const cell = cellBelowCursor(x, y)
-            if (
-                cell != null &&
-                cell.playerId === playerId &&
-                !selectedCellIds.some((cId) => cId === cell.id)
-            ) {
-                setSelectedCellIds([...selectedCellIds, cell.id])
-                console.log('SELECTED')
-            }
-        }
-    }
-
-    const onMouseUp = (x: number, y: number) => {
-        if (mouseDown && selectedCellIds.length > 0) {
-            const cell = cellBelowCursor(x, y)
-            if (cell != null) {
-                const sendUnits: SendUnits = {
-                    senderIds: selectedCellIds,
-                    receiverId: cell.id,
-                }
-                props.spreadGameClient.sendMessageToServer({
-                    type: 'sendunits',
-                    data: sendUnits,
-                })
-                setSelectedCellIds([])
-                setMouseDown(false)
-                console.log('SENDUNITS')
-            }
-        }
-    }
-
+    // init the socket on initial render
     useEffect(() => {
+        spreadGameClient.current = new SocketClient(
+            props.gameSocketUrl,
+            props.token,
+        )
+        const onMessageReceive = (message: ServerMessage) => {
+            //console.log('message received: ', message)
+            if (message.type === 'gamestate') {
+                setClientGameData(message.data)
+            } else if (message.type === 'gameover') {
+                console.log('game is over!')
+            }
+        }
+        spreadGameClient.current.setReceiver(onMessageReceive)
+    }, [props.token, props.gameSocketUrl])
+
+    // update mouse event methods on change
+    // render on canvas
+    useEffect(() => {
+        const cellBelowCursor = (x: number, y: number): ClientCell | null => {
+            if (clientGameState == null) return null
+            const found = clientGameState.cells.filter(
+                (cell) =>
+                    (cell.position[0] - x) ** 2 + (cell.position[1] - y) ** 2 <=
+                    cell.radius ** 2,
+            )
+            if (found.length > 0) return found[0]
+            else return null
+        }
+        const onMouseDown = (x: number, y: number) => {
+            console.log(x, y)
+            const cell = cellBelowCursor(x, y)
+            if (cell != null && cell.playerId === playerId) {
+                setMouseDown(true)
+                setSelectedCellIds([cell.id])
+                console.log('SELECTED')
+            } else {
+                setSelectedCellIds([])
+            }
+        }
+
+        const onMouseMove = (x: number, y: number) => {
+            if (mouseDown && selectedCellIds.length > 0) {
+                const cell = cellBelowCursor(x, y)
+                if (
+                    cell != null &&
+                    cell.playerId === playerId &&
+                    !selectedCellIds.some((cId) => cId === cell.id)
+                ) {
+                    setSelectedCellIds([...selectedCellIds, cell.id])
+                    console.log('SELECTED')
+                }
+            }
+        }
+
+        const onMouseUp = (x: number, y: number) => {
+            if (
+                mouseDown &&
+                selectedCellIds.length > 0 &&
+                spreadGameClient.current != null
+            ) {
+                const cell = cellBelowCursor(x, y)
+                if (cell != null) {
+                    const sendUnits: SendUnits = {
+                        senderIds: selectedCellIds,
+                        receiverId: cell.id,
+                    }
+                    spreadGameClient.current.sendMessageToServer({
+                        type: 'sendunits',
+                        data: sendUnits,
+                    })
+                    setSelectedCellIds([])
+                    setMouseDown(false)
+                    console.log('SENDUNITS')
+                }
+            }
+        }
+
         if (canvasRef.current != null && clientGameState != null) {
             const canvas = canvasRef.current
             const rect = canvas.getBoundingClientRect()
@@ -110,29 +134,22 @@ const Game: React.FC<GameProps> = (props) => {
                 })
             }
         }
-    }, [selectedCellIds, clientGameState])
-
-    const onMessageReceive = (message: ServerMessage) => {
-        //console.log('message received: ', message)
-        if (message.type === 'gamestate') {
-            setClientGameData(message.data)
-        } else if (message.type === 'gameover') {
-            console.log('game is over!')
-        }
-    }
-    props.spreadGameClient.setReceiver(onMessageReceive)
+    }, [selectedCellIds, clientGameState, mouseDown])
 
     const subView = () => {
-        if (clientGameState == null) {
-            return <label> Connected with server!</label>
+        if (spreadGameClient.current == null) {
+            return <label> Not yet connected!</label>
         } else {
-            return <label> game started!</label>
+            return (
+                <label>
+                    connected with game server: {spreadGameClient.current.url}{' '}
+                    via token: {spreadGameClient.current.token}
+                </label>
+            )
         }
     }
     return (
         <div>
-            gameeee with {props.spreadGameClient.url} and{' '}
-            {props.spreadGameClient.token}
             {subView()}
             <canvas
                 style={{ border: '1px solid black' }}

@@ -7,7 +7,6 @@ import { Box } from '@material-ui/core'
 import gameProvider from './game/gameProvider'
 import FindGame from './components/FindGame'
 import Game from './components/Game'
-import SpreadGameClient from './game/gameClient'
 import React from 'react'
 
 const useStyles = makeStyles({
@@ -32,19 +31,21 @@ const useStyles = makeStyles({
 interface AppProps {}
 
 const App: React.FC<AppProps> = (props) => {
-    //gameProvider.clear()
+    gameProvider.clear()
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())
-    const [
-        spreadGameClient,
-        setSpreadGameClient,
-    ] = useState<SpreadGameClient | null>(null)
+    const [gameSocketUrl, setGameSocketUrl] = useState(
+        gameProvider.getSocketUrl(),
+    )
 
     useEffect(() => {
         if (token == null) {
             gameProvider.clear()
             requestToken().then((res) => {
-                if (!isApiError(res)) setToken(res.token)
+                if (!isApiError(res)) {
+                    authProvider.setToken(res.token)
+                    setToken(res.token)
+                }
             })
         }
     })
@@ -52,16 +53,17 @@ const App: React.FC<AppProps> = (props) => {
     const subView = () => {
         if (token == null) {
             return <label>Retrieving token ...</label>
-        } else if (spreadGameClient == null) {
+        } else if (gameSocketUrl == null) {
             return (
                 <FindGame
                     onSetSocketUrl={(url) => {
-                        setSpreadGameClient(new SpreadGameClient(url, token))
+                        gameProvider.setSocketUrl(url)
+                        setGameSocketUrl(url)
                     }}
                 ></FindGame>
             )
         } else {
-            return <Game spreadGameClient={spreadGameClient}></Game>
+            return <Game token={token} gameSocketUrl={gameSocketUrl}></Game>
         }
     }
 

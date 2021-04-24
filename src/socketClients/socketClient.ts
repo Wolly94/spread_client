@@ -1,11 +1,13 @@
-import ClientMessage, { ClientMessageData } from '../shared/clientMessages'
-import ServerMessage from '../shared/serverMessages'
+interface ClientMessage<TMessageData> {
+    token: string
+    data: TMessageData
+}
 
-class SpreadGameClient {
+class SocketClient<TReceiveMessage, TSenderMessageData> {
     socket: WebSocket
     token: string
     url: string
-    onReceiveMessage: null | ((message: ServerMessage) => void)
+    onReceiveMessage: null | ((message: TReceiveMessage) => void)
 
     constructor(toUrl: string, token: string) {
         this.socket = new WebSocket(toUrl + '?token=' + token)
@@ -17,7 +19,7 @@ class SpreadGameClient {
             this.onConnect()
         }
         this.socket.onmessage = (event) => {
-            const data: ServerMessage = JSON.parse(event.data)
+            const data: TReceiveMessage = JSON.parse(event.data)
             if (this.onReceiveMessage != null) this.onReceiveMessage(data)
         }
         this.socket.onclose = () => {
@@ -25,7 +27,7 @@ class SpreadGameClient {
         }
     }
 
-    setReceiver(rec: (message: ServerMessage) => void) {
+    setReceiver(rec: (message: TReceiveMessage) => void) {
         this.onReceiveMessage = rec
     }
 
@@ -39,8 +41,8 @@ class SpreadGameClient {
         }, 100)
     }
 
-    sendMessageToServer(message: ClientMessageData) {
-        const mData: ClientMessage = {
+    sendMessageToServer(message: TSenderMessageData) {
+        const mData: ClientMessage<TSenderMessageData> = {
             token: this.token,
             data: message,
         }
@@ -59,4 +61,4 @@ class SpreadGameClient {
     }
 }
 
-export default SpreadGameClient
+export default SocketClient
