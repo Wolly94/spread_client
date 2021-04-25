@@ -3,7 +3,7 @@ import requestToken from './api/Token'
 import authProvider from './auth/authProvider'
 import { isApiError } from './api/base'
 import { makeStyles } from '@material-ui/core/styles'
-import { Box } from '@material-ui/core'
+import { Box, Grid, Paper } from '@material-ui/core'
 import gameProvider from './game/gameProvider'
 import FindGame from './components/FindGame'
 import Game from './components/Game'
@@ -20,11 +20,12 @@ const useStyles = makeStyles({
         padding: '0 30px',
     },
     centered: {
-        display: 'flex',
+        width: '50%',
         textAlign: 'center',
         justifyContent: 'center',
         alignContent: 'center',
         paddingTop: '100px',
+        paddingLeft: '25%',
     },
 })
 

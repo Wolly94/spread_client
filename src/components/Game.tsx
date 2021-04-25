@@ -7,8 +7,8 @@ import {
     ClientCell,
     ClientGameState,
 } from '../shared/inGame/clientGameState'
-import GameServerMessage from '../shared/inGame/gameServerMessages'
 import SocketClient from '../socketClients/socketClient'
+import GameServerMessage from '../shared/inGame/gameServerMessages'
 
 interface GameProps {
     token: string
@@ -24,7 +24,7 @@ const Game: React.FC<GameProps> = (props) => {
         clientGameState,
         setClientGameData,
     ] = useState<ClientGameState | null>(null)
-    const playerId = 0
+    const [playerId, setPlayerId] = useState<number | null>(null)
 
     const width = 1000
     const height = 1000
@@ -44,6 +44,9 @@ const Game: React.FC<GameProps> = (props) => {
                 setClientGameData(message.data)
             } else if (message.type === 'gameover') {
                 console.log('game is over!')
+            } else if (message.type === 'playerid') {
+                console.log('set playerid to ', message.data.playerId)
+                setPlayerId(message.data.playerId)
             }
         }
         spreadGameClient.current.setReceiver(onMessageReceive)
