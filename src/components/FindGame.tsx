@@ -17,6 +17,7 @@ import FindGameServerMessage, {
     OpenGame,
 } from '../shared/findGame/findGameServerMessages'
 import SocketClient from '../socketClients/socketClient'
+import MyButton from './MyButton'
 import { OpenGameFC, OpenGamesFC } from './OpenGame'
 
 const useStyles = makeStyles((theme) => ({
@@ -26,16 +27,7 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         alignContent: 'center',
     },
-    startGameButton: {
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-        border: 0,
-        borderRadius: 3,
-        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
-        color: 'white',
-        height: 72,
-        width: 256,
-        padding: '0 30px',
-    },
+    startGameButton: {},
     table: {
         width: 720,
     },
@@ -120,7 +112,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             </Grid>
             <Grid container spacing={4} className={classes.root}>
                 <Grid item>
-                    <Button
+                    <MyButton
                         disabled={selectedUrl == null}
                         className={classes.startGameButton}
                         variant="contained"
@@ -132,10 +124,10 @@ const FindGame: React.FC<FindGameProps> = (props) => {
                         }}
                     >
                         Join Game
-                    </Button>
+                    </MyButton>
                 </Grid>
                 <Grid item>
-                    <Button
+                    <MyButton
                         className={classes.startGameButton}
                         variant="contained"
                         color="primary"
@@ -148,7 +140,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
                         }}
                     >
                         Create new Game
-                    </Button>
+                    </MyButton>
                 </Grid>
             </Grid>
         </Box>

@@ -4,12 +4,21 @@ import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { SnackbarProvider } from 'notistack'
+import { BrowserRouter as Router } from 'react-router-dom'
+import Routes from './Routes'
+import { createMuiTheme, ThemeProvider } from '@material-ui/core'
+
+const theme = createMuiTheme({})
 
 ReactDOM.render(
     <React.StrictMode>
-        <SnackbarProvider maxSnack={3}>
-            <App />
-        </SnackbarProvider>
+        <ThemeProvider theme={theme}>
+            <SnackbarProvider maxSnack={3}>
+                <Router>
+                    <Routes></Routes>
+                </Router>
+            </SnackbarProvider>
+        </ThemeProvider>
     </React.StrictMode>,
     document.getElementById('root'),
 )
