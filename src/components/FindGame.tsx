@@ -1,9 +1,10 @@
 import { Button, makeStyles } from '@material-ui/core'
 import { useFormik } from 'formik'
+import { isError } from 'node:util'
 import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
 import { isApiError } from '../api/base'
-import { createGameRequest } from '../api/game'
+import { createGameRequest, getFindGameServer } from '../api/game'
 import gameProvider from '../game/gameProvider'
 import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
 import FindGameServerMessage, {
@@ -39,25 +40,33 @@ interface FindGameProps {
 const FindGame: React.FC<FindGameProps> = (props) => {
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+    const [openGames, setOpenGames] = useState<OpenGame[] | null>(null)
     const findGameClient = useRef<SocketClient<
         FindGameServerMessage,
         FindGameClientMessageData
     > | null>(null)
 
-    const [openGames, setOpenGames] = useState<OpenGame[] | null>(null)
-
     useEffect(() => {
-        const findGameSocketUrl = '' // TODO make http request to normal server
-        findGameClient.current = new SocketClient(
-            findGameSocketUrl,
-            props.token,
-        )
         const onMessageReceive = (message: FindGameServerMessage) => {
             if (message.type === 'opengames') {
                 setOpenGames(message.data)
             }
         }
-        findGameClient.current.setReceiver(onMessageReceive)
+        getFindGameServer().then((urlResp) => {
+            if (!isApiError(urlResp)) {
+                findGameClient.current = new SocketClient(
+                    urlResp.url,
+                    props.token,
+                )
+                findGameClient.current.setReceiver(onMessageReceive)
+            } else {
+                enqueueSnackbar(urlResp.errorMessage, { variant: 'error' })
+            }
+        })
+        return () => {
+            findGameClient.current?.socket.close()
+            findGameClient.current = null
+        }
     }, [props.token])
 
     const formik = useFormik({
@@ -67,7 +76,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             if (isApiError(resp)) {
                 enqueueSnackbar(resp.errorMessage, { variant: 'error' })
             } else {
-                gameProvider.setupGame(resp.id, resp.url)
+                gameProvider.setSocketUrl(resp.url)
                 props.onSetSocketUrl(resp.url)
             }
             setSubmitting(false)
@@ -75,16 +84,18 @@ const FindGame: React.FC<FindGameProps> = (props) => {
     })
     return (
         <form onSubmit={formik.handleSubmit}>
-            {openGames != null && {
-                ...openGames?.map((openGame, index) => {
+            {openGames != null && (
+                <label>{openGames.length} game(s) found</label>
+            )}
+            {openGames != null &&
+                openGames.map((openGame, index) => {
                     return (
                         <OpenGameFC
                             openGame={openGame}
                             key={index}
                         ></OpenGameFC>
                     )
-                }),
-            }}
+                })}
             <label htmlFor="gameId"></label>
             <Button
                 type="submit"

@@ -7,7 +7,7 @@ interface OpenGameProps {
 const OpenGameFC: React.FC<OpenGameProps> = (props) => {
     return (
         <div>
-            {props.openGame.gameId} {props.openGame.joinedPlayers} /{' '}
+            {props.openGame.url} {props.openGame.joinedPlayers} /{' '}
             {props.openGame.players} running: {props.openGame.running}
         </div>
     )

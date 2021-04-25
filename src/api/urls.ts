@@ -5,7 +5,7 @@ const baseUrl = () => {
 const API_PATH = {
     getToken: baseUrl() + 'token',
     createGame: baseUrl() + 'create-game',
-    getGameState: baseUrl() + 'game-state',
+    getFindGame: baseUrl() + 'find-game',
 }
 
 export default API_PATH
