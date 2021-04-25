@@ -1,60 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
-import GameClientMessageData, {
-    SendUnits,
-} from '../shared/inGame/gameClientMessages'
-import {
-    ClientBubble,
-    ClientCell,
-    ClientGameState,
-} from '../shared/inGame/clientGameState'
-import SocketClient from '../socketClients/socketClient'
-import GameServerMessage from '../shared/inGame/gameServerMessages'
 import { Box } from '@material-ui/core'
+import React, { useEffect, useRef } from 'react'
 
-interface GameProps {
-    token: string
-    gameSocketUrl: string
-}
-
-const Game: React.FC<GameProps> = (props) => {
-    const spreadGameClient = useRef<SocketClient<
-        GameServerMessage,
-        GameClientMessageData
-    > | null>(null)
-    const [
-        clientGameState,
-        setClientGameData,
-    ] = useState<ClientGameState | null>(null)
-    const [playerId, setPlayerId] = useState<number | null>(null)
-
+const EditorCanvas = () => {
     const width = 1000
     const height = 1000
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [selectedCellIds, setSelectedCellIds] = useState<number[]>([])
-    const [mouseDown, setMouseDown] = useState(false)
+    const [map, setMap] = useState()
 
-    // init the socket on initial render
-    useEffect(() => {
-        spreadGameClient.current = new SocketClient(
-            props.gameSocketUrl,
-            props.token,
-        )
-        const onMessageReceive = (message: GameServerMessage) => {
-            //console.log('message received: ', message)
-            if (message.type === 'gamestate') {
-                setClientGameData(message.data)
-            } else if (message.type === 'gameover') {
-                console.log('game is over!')
-            } else if (message.type === 'playerid') {
-                console.log('set playerid to ', message.data.playerId)
-                setPlayerId(message.data.playerId)
-            }
-        }
-        spreadGameClient.current.setReceiver(onMessageReceive)
-    }, [props.token, props.gameSocketUrl])
-
-    // update mouse event methods on change
-    // render on canvas
     useEffect(() => {
         const cellBelowCursor = (x: number, y: number): ClientCell | null => {
             if (clientGameState == null) return null
@@ -142,21 +94,8 @@ const Game: React.FC<GameProps> = (props) => {
         }
     }, [selectedCellIds, clientGameState, mouseDown])
 
-    const subView = () => {
-        if (spreadGameClient.current == null) {
-            return <label> Not yet connected!</label>
-        } else {
-            return (
-                <label>
-                    connected with game server: {spreadGameClient.current.url}{' '}
-                    via token: {spreadGameClient.current.token}
-                </label>
-            )
-        }
-    }
     return (
         <Box>
-            {subView()}
             <canvas
                 style={{ border: '1px solid black' }}
                 ref={canvasRef}
@@ -167,39 +106,4 @@ const Game: React.FC<GameProps> = (props) => {
     )
 }
 
-export default Game
-
-const neutralColor = 'grey'
-const playerColors = ['blue', 'red', 'green', 'yellow']
-
-const drawEntity = (
-    context: CanvasRenderingContext2D,
-    obj: ClientCell | ClientBubble,
-    selected: boolean,
-    renderUnitCount: boolean,
-) => {
-    // draw circle
-    context.beginPath()
-    context.fillStyle =
-        obj.playerId != null ? playerColors[obj.playerId] : neutralColor
-    context.strokeStyle = 'grey'
-    context.lineWidth = selected ? 10 : 0
-    context.arc(obj.position[0], obj.position[1], obj.radius, 0, 2 * Math.PI)
-    context.stroke()
-    context.fill()
-
-    // draw unit count
-    if (renderUnitCount) {
-        context.lineWidth = 1
-        context.fillStyle = 'black'
-        context.strokeStyle = 'black'
-        context.textBaseline = 'middle'
-        context.textAlign = 'center'
-        context.font = '17px Arial'
-        context.fillText(
-            Math.floor(obj.units).toString(),
-            obj.position[0],
-            obj.position[1],
-        )
-    }
-}
+export default EditorCanvas
