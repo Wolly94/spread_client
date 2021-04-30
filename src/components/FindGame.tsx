@@ -10,7 +10,7 @@ import { useFormik } from 'formik'
 import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
 import { isApiError } from '../api/base'
-import { createGameRequest, getFindGameServer } from '../api/game'
+import { createGameRequest, getFindGameServer } from '../api/gameApi'
 import gameProvider from '../game/gameProvider'
 import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
 import FindGameServerMessage, {

@@ -172,7 +172,7 @@ export default Game
 const neutralColor = 'grey'
 const playerColors = ['blue', 'red', 'green', 'yellow']
 
-const drawEntity = (
+export const drawEntity = (
     context: CanvasRenderingContext2D,
     obj: ClientCell | ClientBubble,
     selected: boolean,

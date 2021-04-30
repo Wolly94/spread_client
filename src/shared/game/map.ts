@@ -1,12 +1,19 @@
 import Cell from './cell'
 import Player from './player'
 
-export interface Map {
+export interface SpreadMap {
     cells: Cell[]
     players: number
 }
 
-export const exampleMap = (): Map => {
+export const emptyMap = (): SpreadMap => {
+    return {
+        cells: [],
+        players: 1,
+    }
+}
+
+export const exampleMap = (): SpreadMap => {
     return {
         cells: [
             new Cell(0, [100, 100], 100, 50),

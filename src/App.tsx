@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import requestToken from './api/Token'
+import requestToken from './api/token'
 import authProvider from './auth/authProvider'
 import { isApiError } from './api/base'
 import { makeStyles } from '@material-ui/core/styles'
