@@ -10,6 +10,7 @@ import {
 import SocketClient from '../socketClients/socketClient'
 import GameServerMessage from '../shared/inGame/gameServerMessages'
 import { Box } from '@material-ui/core'
+import { MapCell } from '../shared/game/map'
 
 interface GameProps {
     token: string
@@ -140,7 +141,7 @@ const Game: React.FC<GameProps> = (props) => {
                 })
             }
         }
-    }, [selectedCellIds, clientGameState, mouseDown])
+    }, [selectedCellIds, clientGameState, mouseDown, playerId])
 
     const subView = () => {
         if (spreadGameClient.current == null) {
@@ -170,11 +171,12 @@ const Game: React.FC<GameProps> = (props) => {
 export default Game
 
 const neutralColor = 'grey'
+const selectedColor = 'black'
 const playerColors = ['blue', 'red', 'green', 'yellow']
 
 export const drawEntity = (
     context: CanvasRenderingContext2D,
-    obj: ClientCell | ClientBubble,
+    obj: ClientCell | ClientBubble | MapCell,
     selected: boolean,
     renderUnitCount: boolean,
 ) => {
@@ -182,7 +184,7 @@ export const drawEntity = (
     context.beginPath()
     context.fillStyle =
         obj.playerId != null ? playerColors[obj.playerId] : neutralColor
-    context.strokeStyle = 'grey'
+    context.strokeStyle = selectedColor
     context.lineWidth = selected ? 10 : 0
     context.arc(obj.position[0], obj.position[1], obj.radius, 0, 2 * Math.PI)
     context.stroke()

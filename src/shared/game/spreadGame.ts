@@ -10,7 +10,16 @@ export class SpreadGame {
     players: Player[]
 
     constructor(map: SpreadMap, players: Player[]) {
-        this.cells = map.cells
+        this.cells = map.cells.map((mapCell) => {
+            const cell: Cell = new Cell(
+                mapCell.id,
+                mapCell.playerId,
+                mapCell.position,
+                mapCell.units,
+                mapCell.radius,
+            )
+            return cell
+        })
         this.bubbles = []
         this.players = players
     }

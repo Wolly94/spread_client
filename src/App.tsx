@@ -1,16 +1,15 @@
-import { useEffect, useState } from 'react'
+import { Box } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
+import React, { useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
+import { isApiError } from './api/base'
 import requestToken from './api/token'
 import authProvider from './auth/authProvider'
-import { isApiError } from './api/base'
-import { makeStyles } from '@material-ui/core/styles'
-import { Box, Button, Grid, Paper } from '@material-ui/core'
-import gameProvider from './game/gameProvider'
 import FindGame from './components/FindGame'
 import Game from './components/Game'
-import React from 'react'
-import { useHistory } from 'react-router-dom'
-import { PATHS } from './Routes'
 import MyButton from './components/MyButton'
+import gameProvider from './game/gameProvider'
+import { PATHS } from './Routes'
 
 const useStyles = makeStyles({
     centered: {

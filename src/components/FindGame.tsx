@@ -1,12 +1,4 @@
-import {
-    Box,
-    Button,
-    Grid,
-    List,
-    ListItem,
-    makeStyles,
-} from '@material-ui/core'
-import { useFormik } from 'formik'
+import { Box, Grid, makeStyles } from '@material-ui/core'
 import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
 import { isApiError } from '../api/base'
@@ -18,7 +10,7 @@ import FindGameServerMessage, {
 } from '../shared/findGame/findGameServerMessages'
 import SocketClient from '../socketClients/socketClient'
 import MyButton from './MyButton'
-import { OpenGameFC, OpenGamesFC } from './OpenGame'
+import { OpenGamesFC } from './OpenGame'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -94,7 +86,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             findGameClient.current?.socket.close()
             findGameClient.current = null
         }
-    }, [props.token])
+    }, [props.token, enqueueSnackbar])
 
     return (
         <Box className={classes.root}>
@@ -133,7 +125,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
                         color="primary"
                         onClick={() => {
                             createGame().then((gameUrl) => {
-                                if (gameUrl != undefined) {
+                                if (gameUrl !== undefined) {
                                     joinGame(gameUrl)
                                 }
                             })

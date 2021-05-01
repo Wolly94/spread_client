@@ -1,5 +1,4 @@
 import { Box } from '@material-ui/core'
-import * as fs from 'fs'
 import React, { useRef } from 'react'
 import MyButton from './components/MyButton'
 
@@ -16,7 +15,7 @@ export const ReadFile: React.FC<ReadFileProps> = (props) => {
     const onSelectFile = () => {
         if (inputFileRef.current == null) return
         var files = inputFileRef.current.files
-        if (files == undefined || files.length == 0) return
+        if (files === null || files.length === 0) return
         const file = files[0]
         var reader = new FileReader()
         reader.readAsText(file, 'UTF-8')
@@ -68,7 +67,9 @@ export const SaveFile: React.FC<SaveFileProps> = (props) => {
     const href = window.URL.createObjectURL(textToBLOB)
     return (
         <Box>
-            <a download={props.fileName} href={href}></a>
+            <a download={props.fileName} href={href}>
+                Link
+            </a>
             <MyButton onClick={handleBtnClick}>Save map</MyButton>
         </Box>
     )

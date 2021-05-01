@@ -9,24 +9,26 @@ import { emptyMap, exampleMap, SpreadMap } from '../shared/game/map'
 
 const useStyles = makeStyles({
     centered: {
-        width: '50%',
+        width: '65%',
         textAlign: 'center',
         justifyContent: 'center',
         alignContent: 'center',
         paddingTop: '100px',
-        paddingLeft: '25%',
+        paddingLeft: '12.5%',
     },
 })
 
 const Editor = () => {
     const classes = useStyles()
     const history = useHistory()
+    const [unselectCell, setUnselectCell] = useState(0)
 
     const [map, setMap] = useState(emptyMap())
 
     const handleRead = (data: string) => {
         const m: SpreadMap = JSON.parse(data)
         setMap(m)
+        setUnselectCell(unselectCell + 1)
     }
 
     const handleSave = () => {
@@ -36,12 +38,20 @@ const Editor = () => {
 
     return (
         <Box className={classes.centered}>
-            <ReadFile
-                allowedFileEndings={['.spread']}
-                handleInput={handleRead}
-            ></ReadFile>
-            <MyButton onClick={handleSave}>Save Map</MyButton>
-            <EditorCanvas map={map} setMap={setMap}></EditorCanvas>
+            <Box display="flex">
+                <ReadFile
+                    allowedFileEndings={['.spread']}
+                    handleInput={handleRead}
+                ></ReadFile>
+                <Box paddingLeft={3}></Box>
+                <MyButton onClick={handleSave}>Save Map</MyButton>
+            </Box>
+            <Box paddingBottom={3}></Box>
+            <EditorCanvas
+                map={map}
+                setMap={setMap}
+                unselectCell={unselectCell}
+            ></EditorCanvas>
             <MyButton onClick={() => history.push(PATHS.root)}>Back</MyButton>
         </Box>
     )
