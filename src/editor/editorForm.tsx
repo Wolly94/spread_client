@@ -3,8 +3,8 @@ import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
 import MyButton from '../components/MyButton'
-import { distanceToEntity } from '../shared/game/entites'
-import { MapCell, minRadius, SpreadMap } from '../shared/game/map'
+import { supportedPlayers } from '../drawing/draw'
+import { adjustCellValues, MapCell, SpreadMap } from '../shared/game/map'
 
 const neutralPlayerId = -1
 
@@ -19,9 +19,8 @@ interface MapCellFormValues {
 interface EditorFormProps {
     selectedCell: MapCell
     map: SpreadMap
-    updateSelectedCell: (mapCell: MapCell) => void
+    updateSelectedCell: (mapCell: MapCell) => string | null
     removeCell: (cellId: number) => void
-    adjustCellValues: (mapCell: MapCell) => string | null
 }
 
 const EditorForm: React.FC<EditorFormProps> = (props) => {
@@ -63,9 +62,8 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                         ? null
                         : values.playerId,
             }
-            const errorMessage = props.adjustCellValues(newSelectedCell)
+            const errorMessage = props.updateSelectedCell(newSelectedCell)
             if (errorMessage === null) {
-                props.updateSelectedCell(newSelectedCell)
                 resetForm()
             } else {
                 setStatus(errorMessage)
@@ -75,8 +73,8 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
     })
 
     let players = []
-    for (let i = 0; i < props.map.players + 1; i++) {
-        players.push(i + 1)
+    for (let i = 0; i < supportedPlayers() /*props.map.players*/; i++) {
+        players.push(i)
     }
 
     return (
@@ -149,6 +147,7 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                 value={formik.values.playerId}
                 onChange={(e) => {
                     formik.handleChange(e)
+                    formik.submitForm()
                 }}
                 onBlur={formik.handleBlur}
                 style={{ display: 'block' }}
@@ -164,7 +163,7 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
             <Box paddingBottom={3}></Box>
 
             <MyButton type="submit" onClick={(ev) => formik.handleSubmit()}>
-                Submit
+                Apply Changes
             </MyButton>
         </form>
     )

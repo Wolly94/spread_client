@@ -1,8 +1,14 @@
-import { Box, makeStyles } from '@material-ui/core'
+import { Box } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { drawEntity } from '../components/Game'
-import { distanceToEntity, entityContainsPoint } from '../shared/game/entites'
-import { MapCell, minRadius, SpreadMap } from '../shared/game/map'
+import { drawEntity } from '../drawing/draw'
+import { entityContainsPoint } from '../shared/game/entites'
+import {
+    addCellToMap,
+    MapCell,
+    removeCellFromMap,
+    SpreadMap,
+    updateCellInMap,
+} from '../shared/game/map'
 import EditorForm from './editorForm'
 
 interface MouseDownProps {
@@ -42,48 +48,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         setSelectedCellId(null)
     }, [props.unselectCell])
 
-    const getSpace = (position: [number, number]) => {
-        const distToBbox = Math.min(
-            position[0],
-            position[1],
-            Math.abs(position[0] - width),
-            Math.abs(position[1] - height),
-        )
-        const distToCells = Math.min(
-            ...map.cells.map((cell) => distanceToEntity(cell, position)),
-        )
-        return Math.min(distToBbox, distToCells)
-    }
-
-    const adjustCellValues = useCallback(
-        (cell: MapCell) => {
-            cell.radius = Math.floor(cell.radius)
-            cell.units = Math.floor(cell.units)
-            cell.position = [
-                Math.floor(cell.position[0]),
-                Math.floor(cell.position[1]),
-            ]
-            if (cell.radius < minRadius) return 'Radius too small!'
-            const availableSpace = Math.floor(
-                Math.min(
-                    cell.position[0],
-                    cell.position[1],
-                    map.width - cell.position[0],
-                    map.height - cell.position[1],
-                    ...map.cells
-                        .filter((c) => c.id !== cell.id)
-                        .map((c) => distanceToEntity(c, cell.position)),
-                ),
-            )
-            if (availableSpace < minRadius) {
-                return 'Not enough space!'
-            }
-            cell.radius = Math.min(availableSpace, cell.radius)
-            return null
-        },
-        [map],
-    )
-
     const createCell = useCallback(
         (position: [number, number]) => {
             const nextId = Math.max(0, ...usedIds) + 1
@@ -94,46 +58,31 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 radius: defaultRadius,
                 units: defaultUnits,
             }
-            const error = adjustCellValues(cell)
-            if (error !== null) return null
-            setUsedIds([...usedIds, nextId])
-            addCellToMap(cell)
-            return cell
-        },
-        [usedIds, getSpace],
-    )
-
-    const addCellToMap = useCallback(
-        (cell: MapCell) => {
-            if (map.cells.some((c) => c.id === cell.id)) {
-                return
+            const r = addCellToMap(cell, map)
+            if (r.error !== null) return null
+            else {
+                setUsedIds([...usedIds, nextId])
+                setMap(r.map)
+                return nextId
             }
-            const cells = [...map.cells, cell]
-            const players = new Set(cells.map((c) => c.playerId)).size
-            setMap({ ...map, players: players, cells: cells })
         },
-        [map, setMap],
+        [usedIds, map, setMap],
     )
 
     const updateCell = useCallback(
         (cell: MapCell) => {
-            const error = adjustCellValues(cell)
-            if (error !== null) return error
-            let newCells = [...map.cells]
-            const index = newCells.findIndex((c) => c.id === cell.id)
-            if (index >= 0) newCells[index] = cell
-            setMap({ ...map, cells: newCells })
+            const r = updateCellInMap(cell, map)
+            if (r.error !== null) return r.error
+            setMap(r.map)
             return null
         },
-        [map, setMap, adjustCellValues],
+        [map, setMap],
     )
 
     const removeCell = useCallback(
         (cellId: number) => {
-            let newCells = [...map.cells]
-            const index = newCells.findIndex((c) => c.id === cellId)
-            if (index >= 0) newCells.splice(index, 1)
-            setMap({ ...map, cells: newCells })
+            const newMap = removeCellFromMap(cellId, map)
+            setMap(newMap)
         },
         [map, setMap],
     )
@@ -148,17 +97,19 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 })
                 setSelectedCellId(cell.id)
             } else {
-                const cell = createCell([x, y])
-                if (cell !== null) {
-                    setSelectedCellId(cell.id)
-                    setMouseDownProps({
-                        position: [x, y],
-                        clickedEntityCenter: cell.position,
-                    })
+                const cellId = createCell([x, y])
+                if (cellId !== null) {
+                    setSelectedCellId(cellId)
+                    if (selectedCell !== null) {
+                        setMouseDownProps({
+                            position: [x, y],
+                            clickedEntityCenter: selectedCell.position,
+                        })
+                    }
                 }
             }
         },
-        [map],
+        [map, createCell, selectedCell],
     )
 
     const onMouseMove = useCallback(
@@ -195,21 +146,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 setMouseDownProps(null)
             }
         },
-        [
-            mouseDownProps,
-            adjustCellValues,
-            removeCell,
-            selectedCell,
-            updateCell,
-        ],
+        [mouseDownProps, removeCell, selectedCell, updateCell],
     )
 
-    const onMouseUp = useCallback(
-        (x: number, y: number) => {
-            setMouseDownProps(null)
-        },
-        [mouseDownProps],
-    )
+    const onMouseUp = useCallback((x: number, y: number) => {
+        setMouseDownProps(null)
+    }, [])
 
     useEffect(() => {
         if (canvasRef.current != null) {
@@ -240,8 +182,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 <canvas
                     style={{ border: '1px solid black' }}
                     ref={canvasRef}
-                    height={height}
-                    width={width}
+                    height={map.height}
+                    width={map.width}
                 />
             </Box>
             {selectedCell !== null && (
@@ -250,10 +192,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                         selectedCell={selectedCell}
                         map={map}
                         updateSelectedCell={(selCell) => {
-                            updateCell(selCell)
+                            return updateCell(selCell)
                         }}
                         removeCell={removeCell}
-                        adjustCellValues={adjustCellValues}
                     ></EditorForm>
                 </Box>
             )}
