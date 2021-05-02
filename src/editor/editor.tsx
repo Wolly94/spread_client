@@ -11,6 +11,7 @@ import {
     SpreadMap,
     validateMap,
 } from '../shared/game/map'
+import { generate2PlayerMap } from '../shared/game/mapGenerator'
 
 const useStyles = makeStyles({
     centered: {
@@ -52,12 +53,21 @@ const Editor = () => {
         setUnselectCell(unselectCell + 1)
     }
 
+    const randomMap = () => {
+        const m = generate2PlayerMap()
+        setMap(m)
+        setUnselectCell(unselectCell + 1)
+    }
+
     return (
         <Box className={classes.centered}>
             <Grid container spacing={4} direction={'row'}>
                 <Grid container spacing={4} direction={'row'}>
                     <Grid item xs={3}>
-                        <MyButton onClick={startOver}>New</MyButton>
+                        <MyButton onClick={startOver}>New Map</MyButton>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <MyButton onClick={randomMap}>Random Map</MyButton>
                     </Grid>
                     <Grid item xs={3}>
                         <ReadFile
