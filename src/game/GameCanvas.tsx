@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Box } from '@material-ui/core'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { drawEntity } from '../drawing/draw'
 import { entityContainsPoint } from '../shared/game/entites'
 import { SpreadMap } from '../shared/game/map'
@@ -35,17 +36,20 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         [clientGameState],
     )
 
-    const onMouseDown = useCallback((x: number, y: number) => {
-        console.log(x, y)
-        const cell = cellBelowCursor(x, y)
-        if (cell != null && cell.playerId === playerId) {
-            setMouseDown(true)
-            setSelectedCellIds([cell.id])
-            console.log('SELECTED')
-        } else {
-            setSelectedCellIds([])
-        }
-    }, [])
+    const onMouseDown = useCallback(
+        (x: number, y: number) => {
+            console.log(x, y)
+            const cell = cellBelowCursor(x, y)
+            if (cell != null && cell.playerId === playerId) {
+                setMouseDown(true)
+                setSelectedCellIds([cell.id])
+                console.log('SELECTED')
+            } else {
+                setSelectedCellIds([])
+            }
+        },
+        [cellBelowCursor, playerId],
+    )
 
     const onMouseMove = useCallback(
         (x: number, y: number) => {
@@ -61,13 +65,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 }
             }
         },
-        [selectedCellIds],
+        [selectedCellIds, mouseDown, playerId],
     )
 
-    // update mouse event methods on change
-    // render on canvas
-    useEffect(() => {
-        const onMouseUp = (x: number, y: number) => {
+    const onMouseUp = useCallback(
+        (x: number, y: number) => {
             if (mouseDown && selectedCellIds.length > 0) {
                 const cell = cellBelowCursor(x, y)
                 if (cell != null) {
@@ -84,8 +86,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                     console.log('SENDUNITS')
                 }
             }
-        }
+        },
+        [mouseDown, cellBelowCursor, props],
+    )
 
+    // update mouse event methods on change
+    // render on canvas
+    useEffect(() => {
         if (canvasRef.current != null && clientGameState != null) {
             const canvas = canvasRef.current
             const rect = canvas.getBoundingClientRect()
@@ -111,9 +118,27 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 })
             }
         }
-    }, [selectedCellIds, clientGameState, mouseDown, playerId])
+    }, [
+        selectedCellIds,
+        clientGameState,
+        mouseDown,
+        onMouseDown,
+        onMouseUp,
+        onMouseMove,
+        playerId,
+        props.map,
+    ])
 
-    return <label>game canvas</label>
+    return (
+        <Box>
+            <canvas
+                style={{ border: '1px solid black' }}
+                ref={canvasRef}
+                height={props.map.height}
+                width={props.map.width}
+            />
+        </Box>
+    )
 }
 
 export default GameCanvas
