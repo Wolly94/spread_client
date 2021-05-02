@@ -4,7 +4,7 @@ import React from 'react'
 import * as yup from 'yup'
 import MyButton from '../components/MyButton'
 import { supportedPlayers } from '../drawing/draw'
-import { adjustCellValues, MapCell, SpreadMap } from '../shared/game/map'
+import { MapCell, SpreadMap } from '../shared/game/map'
 
 const neutralPlayerId = -1
 
@@ -156,7 +156,7 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
 
                 {players.map((i) => (
                     <MenuItem key={i} value={i}>
-                        Player {i}
+                        Player {i + 1}
                     </MenuItem>
                 ))}
             </Select>

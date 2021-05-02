@@ -1,11 +1,4 @@
-import {
-    addCellToMap,
-    adjustCellValues,
-    emptyMap,
-    getPlayerIds,
-    MapCell,
-    SpreadMap,
-} from './map'
+import { addCellToMap, emptyMap, MapCell, SpreadMap } from './map'
 
 function getRandomIntInclusive(min: number, max: number) {
     min = Math.ceil(min)
@@ -24,7 +17,7 @@ export const generate2PlayerMap = () => {
     let cellId = 1
     const cellDensity = 0.05
     const cellRadii = [25, 100]
-    const playerDist = [5, 3, 1]
+    const playerDist = [5, 3, 1] // 5 null : 3 owner of side : 1 owner of other side
     const radiusAccuracy = 5
     let setStartingCells = false
     let map = emptyMap()
@@ -33,7 +26,6 @@ export const generate2PlayerMap = () => {
     // generate cells on the map
     while (calculateDensity(map) < cellDensity) {
         let centered = false
-        // todo random playerid
         const number = getRandomIntInclusive(
             setStartingCells ? 1 : playerDist[0] + 1,
             playerDist.reduce((s, n) => s + n, 0),

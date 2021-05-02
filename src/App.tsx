@@ -8,7 +8,7 @@ import authProvider from './auth/authProvider'
 import FindGame from './components/FindGame'
 import Game from './components/Game'
 import MyButton from './components/MyButton'
-import gameProvider from './game/gameProvider'
+import gameProvider from './gameProvider'
 import { PATHS } from './Routes'
 
 const useStyles = makeStyles({

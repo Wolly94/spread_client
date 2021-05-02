@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
 import { isApiError } from '../api/base'
 import { createGameRequest, getFindGameServer } from '../api/gameApi'
-import gameProvider from '../game/gameProvider'
+import gameProvider from '../gameProvider'
 import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
 import FindGameServerMessage, {
     OpenGame,

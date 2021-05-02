@@ -1,3 +1,4 @@
+import { ClientCell } from '../inGame/clientGameState'
 import Bubble from './bubble'
 import Cell from './cell'
 import { MapCell } from './map'
@@ -16,6 +17,9 @@ export const distanceToEntity = (
     return result
 }
 
-export const entityContainsPoint = (entity: MapCell, pos: [number, number]) => {
+export const entityContainsPoint = (
+    entity: MapCell | ClientCell,
+    pos: [number, number],
+) => {
     return distanceToEntity(entity, pos) <= 0
 }
