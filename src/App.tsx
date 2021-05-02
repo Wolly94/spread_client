@@ -54,7 +54,7 @@ const App: React.FC<AppProps> = (props) => {
                     token={token}
                     onSetSocketUrl={(url) => {
                         gameProvider.setSocketUrl(url)
-                        setGameSocketUrl(url)
+                        history.push(PATHS.game)
                     }}
                 ></FindGame>
             )

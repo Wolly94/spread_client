@@ -5,6 +5,7 @@ import { SpreadMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import GameClientMessageData, {
     SetMapMessage,
+    StartGameMessage,
 } from '../shared/inGame/gameClientMessages'
 
 interface GameLobbyProps {
@@ -23,10 +24,20 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         props.sendMessageToServer(m)
         setMap(randomMap)
     }
+    const startGame = () => {
+        const m: StartGameMessage = {
+            type: 'startgame',
+            data: {},
+        }
+        props.sendMessageToServer(m)
+    }
     return (
         <Box>
             <MyButton onClick={onSelectMap}>
                 {map !== null ? 'Change Map' : 'Select Map'}
+            </MyButton>
+            <MyButton disabled={map === null} onClick={startGame}>
+                Start Game
             </MyButton>
         </Box>
     )

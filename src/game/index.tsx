@@ -24,12 +24,13 @@ const Game = () => {
     ] = useState<ClientGameState | null>(null)
     const [map, setMap] = useState<SpreadMap | null>(null)
     const [playerId, setPlayerId] = useState<number | null>(null)
+    const [refresh, setRefresh] = React.useState(0)
 
     useEffect(() => {
         const token = authProvider.getToken()
         const gameSocketUrl = gameProvider.getSocketUrl()
         if (token === null || gameSocketUrl === null) history.push(PATHS.root)
-        else {
+        else if (spreadGameClient.current === null) {
             spreadGameClient.current = new SocketClient(gameSocketUrl, token)
             const onMessageReceive = (message: GameServerMessage) => {
                 //console.log('message received: ', message)
@@ -43,12 +44,13 @@ const Game = () => {
                 }
             }
             spreadGameClient.current.setReceiver(onMessageReceive)
+            setRefresh(refresh + 1)
         }
-        return () => {
+        /*         return () => {
             if (spreadGameClient.current !== null)
                 spreadGameClient.current.close()
-        }
-    }, [])
+        } */
+    })
 
     const subView = () => {
         if (
@@ -62,9 +64,10 @@ const Game = () => {
                     playerId={playerId}
                     map={map}
                     clientGameState={clientGameState}
-                    sendMessageToServer={
-                        spreadGameClient.current.sendMessageToServer
-                    }
+                    sendMessageToServer={(msg) => {
+                        if (spreadGameClient.current !== null)
+                            spreadGameClient.current.sendMessageToServer(msg)
+                    }}
                 ></GameCanvas>
             )
         } else if (spreadGameClient.current !== null) {
@@ -72,13 +75,20 @@ const Game = () => {
                 <GameLobby
                     map={map}
                     setMap={setMap}
-                    sendMessageToServer={
-                        spreadGameClient.current.sendMessageToServer
-                    }
+                    sendMessageToServer={(msg) => {
+                        if (spreadGameClient.current !== null)
+                            spreadGameClient.current.sendMessageToServer(msg)
+                    }}
                 ></GameLobby>
             )
         } else {
-            return <label> loading</label>
+            return (
+                <label>
+                    {' '}
+                    loading ... token: {authProvider.getToken()} and url:{' '}
+                    {gameProvider.getSocketUrl()}
+                </label>
+            )
         }
     }
     return <Box>{subView()}</Box>

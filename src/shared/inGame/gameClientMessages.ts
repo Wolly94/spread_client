@@ -15,6 +15,11 @@ export interface SetMapMessage {
     data: SpreadMap
 }
 
-type GameClientMessageData = SendUnitsMessage | SetMapMessage
+export interface StartGameMessage {
+    type: 'startgame'
+    data: {}
+}
+
+type GameClientMessageData = SendUnitsMessage | SetMapMessage | StartGameMessage
 
 export default GameClientMessageData

@@ -58,8 +58,6 @@ const FindGame: React.FC<FindGameProps> = (props) => {
     }
     const joinGame = (gameUrl: string) => {
         setSubmitting(true)
-        gameProvider.setSocketUrl(gameUrl)
-        history.push(PATHS.game)
         props.onSetSocketUrl(gameUrl)
         setSubmitting(false)
     }

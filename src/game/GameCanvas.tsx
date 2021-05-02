@@ -81,11 +81,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                         type: 'sendunits',
                         data: sendUnits,
                     })
-                    setSelectedCellIds([])
-                    setMouseDown(false)
                     console.log('SENDUNITS')
                 }
             }
+            setMouseDown(false)
+            setSelectedCellIds([])
         },
         [mouseDown, cellBelowCursor, props],
     )
