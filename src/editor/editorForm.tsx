@@ -2,6 +2,7 @@ import { Box, MenuItem, Select, TextField, Typography } from '@material-ui/core'
 import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
+import MyButton from '../components/MyButton'
 import { distanceToEntity } from '../shared/game/entites'
 import { MapCell, minRadius, SpreadMap } from '../shared/game/map'
 
@@ -162,9 +163,9 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
             </Select>
             <Box paddingBottom={3}></Box>
 
-            <button type="submit" onClick={(ev) => formik.handleSubmit()}>
+            <MyButton type="submit" onClick={(ev) => formik.handleSubmit()}>
                 Submit
-            </button>
+            </MyButton>
         </form>
     )
 }
