@@ -20,6 +20,7 @@ interface EditorFormProps {
     map: SpreadMap
     updateSelectedCell: (mapCell: MapCell) => void
     removeCell: (cellId: number) => void
+    adjustCellValues: (mapCell: MapCell) => string | null
 }
 
 const EditorForm: React.FC<EditorFormProps> = (props) => {
@@ -51,48 +52,24 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                 props.removeCell(props.selectedCell.id)
                 return
             }
-            const availableSpace = Math.floor(
-                Math.min(
-                    values.xCoord,
-                    values.yCoord,
-                    props.map.width - values.xCoord,
-                    props.map.height - values.yCoord,
-                    ...props.map.cells
-                        .filter((c) => c.id !== props.selectedCell.id)
-                        .map((c) =>
-                            distanceToEntity(c, [values.xCoord, values.yCoord]),
-                        ),
-                ),
-            )
-            if (values.radius < minRadius) {
-                setSubmitting(false)
-                setStatus('Radius too small!')
-                return
-            }
-            if (availableSpace < minRadius) {
-                setSubmitting(false)
-                setStatus('Not enough space!')
-                return
-            }
             const newSelectedCell: MapCell = {
                 ...props.selectedCell,
-                position: [
-                    Math.floor(values.xCoord),
-                    Math.floor(values.yCoord),
-                ],
-                units: Math.floor(values.units),
-                radius: Math.min(
-                    Math.max(Math.floor(values.radius), minRadius),
-                    availableSpace,
-                ),
+                position: [values.xCoord, values.yCoord],
+                units: values.units,
+                radius: values.radius,
                 playerId:
                     values.playerId === neutralPlayerId
                         ? null
                         : values.playerId,
             }
-            props.updateSelectedCell(newSelectedCell)
+            const errorMessage = props.adjustCellValues(newSelectedCell)
+            if (errorMessage === null) {
+                props.updateSelectedCell(newSelectedCell)
+                resetForm()
+            } else {
+                setStatus(errorMessage)
+            }
             setSubmitting(false)
-            resetForm()
         },
     })
 

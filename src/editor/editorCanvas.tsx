@@ -5,6 +5,11 @@ import { distanceToEntity, entityContainsPoint } from '../shared/game/entites'
 import { MapCell, minRadius, SpreadMap } from '../shared/game/map'
 import EditorForm from './editorForm'
 
+interface MouseDownProps {
+    position: [number, number]
+    clickedEntityCenter: [number, number] | null
+}
+
 interface EditorCanvasProps {
     map: SpreadMap
     setMap: React.Dispatch<React.SetStateAction<SpreadMap>>
@@ -23,6 +28,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [usedIds, setUsedIds] = useState<number[]>([])
     const [selectedCellId, setSelectedCellId] = useState<number | null>(null)
+    const [mouseDownProps, setMouseDownProps] = useState<MouseDownProps | null>(
+        null,
+    )
     //const [map, setMap] = useState(props.map)
     const selectedCell = useMemo(() => {
         const c = map.cells.find((cell) => cell.id === selectedCellId)
@@ -47,20 +55,49 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         return Math.min(distToBbox, distToCells)
     }
 
+    const adjustCellValues = useCallback(
+        (cell: MapCell) => {
+            cell.radius = Math.floor(cell.radius)
+            cell.units = Math.floor(cell.units)
+            cell.position = [
+                Math.floor(cell.position[0]),
+                Math.floor(cell.position[1]),
+            ]
+            if (cell.radius < minRadius) return 'Radius too small!'
+            const availableSpace = Math.floor(
+                Math.min(
+                    cell.position[0],
+                    cell.position[1],
+                    map.width - cell.position[0],
+                    map.height - cell.position[1],
+                    ...map.cells
+                        .filter((c) => c.id !== cell.id)
+                        .map((c) => distanceToEntity(c, cell.position)),
+                ),
+            )
+            if (availableSpace < minRadius) {
+                return 'Not enough space!'
+            }
+            cell.radius = Math.min(availableSpace, cell.radius)
+            return null
+        },
+        [map],
+    )
+
     const createCell = useCallback(
         (position: [number, number]) => {
-            position = [Math.floor(position[0]), Math.floor(position[1])]
-            const space = Math.floor(getSpace(position))
-            if (space < minRadius) return null
             const nextId = Math.max(0, ...usedIds) + 1
-            setUsedIds([...usedIds, nextId])
             const cell: MapCell = {
                 id: nextId,
                 playerId: null,
                 position: position,
-                radius: Math.min(defaultRadius, space),
+                radius: defaultRadius,
                 units: defaultUnits,
             }
+            const error = adjustCellValues(cell)
+            if (error !== null) return null
+            setUsedIds([...usedIds, nextId])
+            addCellToMap(cell)
             return cell
         },
         [usedIds, getSpace],
@@ -80,12 +117,15 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
     const updateCell = useCallback(
         (cell: MapCell) => {
+            const error = adjustCellValues(cell)
+            if (error !== null) return error
             let newCells = [...map.cells]
             const index = newCells.findIndex((c) => c.id === cell.id)
             if (index >= 0) newCells[index] = cell
             setMap({ ...map, cells: newCells })
+            return null
         },
-        [map, setMap],
+        [map, setMap, adjustCellValues],
     )
 
     const removeCell = useCallback(
@@ -100,20 +140,75 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
     const onMouseDown = useCallback(
         (x: number, y: number) => {
-            if (
-                selectedCell != null &&
-                entityContainsPoint(selectedCell, [x, y])
-            ) {
-                // TODO set mouse down and stuff
+            const cell = map.cells.find((c) => entityContainsPoint(c, [x, y]))
+            if (cell !== undefined) {
+                setMouseDownProps({
+                    position: [x, y],
+                    clickedEntityCenter: cell.position,
+                })
+                setSelectedCellId(cell.id)
             } else {
-                const newCell = createCell([x, y])
-                if (newCell != null) {
-                    addCellToMap(newCell)
-                    setSelectedCellId(newCell.id)
+                const cell = createCell([x, y])
+                if (cell !== null) {
+                    setSelectedCellId(cell.id)
+                    setMouseDownProps({
+                        position: [x, y],
+                        clickedEntityCenter: cell.position,
+                    })
                 }
             }
         },
-        [addCellToMap, createCell, selectedCell],
+        [map],
+    )
+
+    const onMouseMove = useCallback(
+        (x: number, y: number) => {
+            if (
+                selectedCell !== null &&
+                mouseDownProps !== null &&
+                mouseDownProps.clickedEntityCenter !== null
+            ) {
+                const diff = [
+                    x - mouseDownProps.position[0],
+                    y - mouseDownProps.position[1],
+                ]
+                const newPos: [number, number] = [
+                    mouseDownProps.clickedEntityCenter[0] + diff[0],
+                    mouseDownProps.clickedEntityCenter[1] + diff[1],
+                ]
+                selectedCell.position = newPos
+                const error = updateCell(selectedCell)
+                if (error !== null) {
+                    removeCell(selectedCell.id)
+                    setMouseDownProps({
+                        ...mouseDownProps,
+                        clickedEntityCenter: null,
+                    })
+                    setSelectedCellId(null)
+                }
+            } else if (
+                selectedCell !== null &&
+                mouseDownProps !== null &&
+                mouseDownProps.clickedEntityCenter === null
+            ) {
+                setSelectedCellId(null)
+                setMouseDownProps(null)
+            }
+        },
+        [
+            mouseDownProps,
+            adjustCellValues,
+            removeCell,
+            selectedCell,
+            updateCell,
+        ],
+    )
+
+    const onMouseUp = useCallback(
+        (x: number, y: number) => {
+            setMouseDownProps(null)
+        },
+        [mouseDownProps],
     )
 
     useEffect(() => {
@@ -122,11 +217,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
             const rect = canvas.getBoundingClientRect()
             canvas.onmousedown = (ev) =>
                 onMouseDown(ev.x - rect.left, ev.y - rect.top)
-            /*
             canvas.onmousemove = (ev) =>
                 onMouseMove(ev.x - rect.left, ev.y - rect.top)
             canvas.onmouseup = (ev) =>
-                onMouseUp(ev.x - rect.left, ev.y - rect.top) */
+                onMouseUp(ev.x - rect.left, ev.y - rect.top)
             const context = canvas.getContext('2d')
             if (context != null) {
                 context.clearRect(0, 0, width, height)
@@ -138,7 +232,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 }
             }
         }
-    }, [map, onMouseDown, selectedCell])
+    }, [map, selectedCell, height, width, onMouseDown, onMouseMove, onMouseUp])
 
     return (
         <Box display="flex">
@@ -159,6 +253,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                             updateCell(selCell)
                         }}
                         removeCell={removeCell}
+                        adjustCellValues={adjustCellValues}
                     ></EditorForm>
                 </Box>
             )}
