@@ -24,6 +24,10 @@ class SocketClient<TReceiveMessage, TSenderMessageData> {
         }
     }
 
+    close() {
+        this.socket.close()
+    }
+
     setReceiver(rec: (message: TReceiveMessage) => void) {
         this.onReceiveMessage = rec
     }

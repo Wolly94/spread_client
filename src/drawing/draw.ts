@@ -5,10 +5,6 @@ export const neutralColor = 'grey'
 export const selectedColor = 'black'
 export const playerColors = ['blue', 'red', 'green', 'yellow']
 
-export const supportedPlayers = () => {
-    return playerColors.length
-}
-
 export const drawEntity = (
     context: CanvasRenderingContext2D,
     obj: ClientCell | ClientBubble | MapCell,

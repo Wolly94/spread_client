@@ -3,8 +3,7 @@ import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
 import MyButton from '../components/MyButton'
-import { supportedPlayers } from '../drawing/draw'
-import { MapCell, SpreadMap } from '../shared/game/map'
+import { MapCell, mapDefaults, SpreadMap } from '../shared/game/map'
 
 const neutralPlayerId = -1
 
@@ -73,7 +72,7 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
     })
 
     let players = []
-    for (let i = 0; i < supportedPlayers() /*props.map.players*/; i++) {
+    for (let i = 0; i < mapDefaults.maxPlayers /*props.map.players*/; i++) {
         players.push(i)
     }
 

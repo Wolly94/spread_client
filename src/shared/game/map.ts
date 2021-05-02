@@ -1,4 +1,3 @@
-import { supportedPlayers } from '../../drawing/draw'
 import Cell from './cell'
 import { distanceToEntity } from './entites'
 
@@ -36,7 +35,7 @@ export const mapDefaults = {
     minRadius: 15,
     width: 1000,
     height: 1000,
-    players: supportedPlayers(),
+    maxPlayers: 4,
 }
 
 export const availableSpace = (map: SpreadMap, cell: MapCell) => {
@@ -103,7 +102,7 @@ export const addCellToMap = (
 export const emptyMap = (): SpreadMap => {
     return {
         cells: [],
-        players: mapDefaults.players,
+        players: mapDefaults.maxPlayers,
         width: 1000,
         height: 1000,
     }

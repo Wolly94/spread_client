@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import authProvider from '../auth/authProvider'
@@ -43,6 +44,10 @@ const Game = () => {
             }
             spreadGameClient.current.setReceiver(onMessageReceive)
         }
+        return () => {
+            if (spreadGameClient.current !== null)
+                spreadGameClient.current.close()
+        }
     }, [])
 
     const subView = () => {
@@ -62,11 +67,21 @@ const Game = () => {
                     }
                 ></GameCanvas>
             )
+        } else if (spreadGameClient.current !== null) {
+            return (
+                <GameLobby
+                    map={map}
+                    setMap={setMap}
+                    sendMessageToServer={
+                        spreadGameClient.current.sendMessageToServer
+                    }
+                ></GameLobby>
+            )
         } else {
-            return <GameLobby></GameLobby>
+            return <label> loading</label>
         }
     }
-    return <label> new game view</label>
+    return <Box>{subView()}</Box>
 }
 
 export default Game
