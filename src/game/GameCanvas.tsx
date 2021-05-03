@@ -5,6 +5,7 @@ import { entityContainsPoint } from '../shared/game/entites'
 import { SpreadMap } from '../shared/game/map'
 import { ClientCell, ClientGameState } from '../shared/inGame/clientGameState'
 import GameClientMessageData, {
+    ClientInGameMessage,
     SendUnits,
     SendUnitsMessage,
 } from '../shared/inGame/gameClientMessages'
@@ -13,7 +14,7 @@ interface GameCanvasProps {
     map: SpreadMap
     clientGameState: ClientGameState
     playerId: number
-    sendMessageToServer: (message: GameClientMessageData) => void
+    sendMessageToServer: (message: ClientInGameMessage) => void
 }
 
 const GameCanvas: React.FC<GameCanvasProps> = ({

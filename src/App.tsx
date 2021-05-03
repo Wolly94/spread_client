@@ -43,7 +43,7 @@ const App: React.FC<AppProps> = (props) => {
                 }
             })
         }
-    })
+    }, [token])
 
     const subView = () => {
         if (token == null) {
@@ -65,6 +65,7 @@ const App: React.FC<AppProps> = (props) => {
 
     return (
         <Box className={classes.centered}>
+            <MyButton onClick={() => setToken(null)}>Reset Token</MyButton>
             <MyButton onClick={() => history.push(PATHS.editor)}>
                 Create your own Map
             </MyButton>

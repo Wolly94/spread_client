@@ -8,6 +8,9 @@ const authProvider = {
     setToken: (token: string) => {
         localStorage.setItem(tokenIdentifier, token)
     },
+    clear: () => {
+        localStorage.removeItem(tokenIdentifier)
+    },
 }
 
 export default authProvider

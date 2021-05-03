@@ -4,6 +4,7 @@ import MyButton from '../components/MyButton'
 import { SpreadMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import GameClientMessageData, {
+    ClientLobbyMessage,
     SetMapMessage,
     StartGameMessage,
 } from '../shared/inGame/gameClientMessages'
@@ -11,7 +12,7 @@ import GameClientMessageData, {
 interface GameLobbyProps {
     map: SpreadMap | null
     setMap: React.Dispatch<React.SetStateAction<SpreadMap | null>>
-    sendMessageToServer: (message: GameClientMessageData) => void
+    sendMessageToServer: (message: ClientLobbyMessage) => void
 }
 
 const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {

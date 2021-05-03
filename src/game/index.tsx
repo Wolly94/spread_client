@@ -7,7 +7,11 @@ import { PATHS } from '../Routes'
 import { SpreadMap } from '../shared/game/map'
 import { ClientGameState } from '../shared/inGame/clientGameState'
 import GameClientMessageData from '../shared/inGame/gameClientMessages'
-import GameServerMessage from '../shared/inGame/gameServerMessages'
+import GameServerMessage, {
+    ClientLobbyPlayer,
+    ClientLobbyState,
+    isServerLobbyMessage,
+} from '../shared/inGame/gameServerMessages'
 import SocketClient from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'
@@ -25,6 +29,7 @@ const Game = () => {
     const [map, setMap] = useState<SpreadMap | null>(null)
     const [playerId, setPlayerId] = useState<number | null>(null)
     const [refresh, setRefresh] = React.useState(0)
+    const [players, setPlayers] = useState<ClientLobbyPlayer[]>([])
 
     useEffect(() => {
         const token = authProvider.getToken()
@@ -34,13 +39,21 @@ const Game = () => {
             spreadGameClient.current = new SocketClient(gameSocketUrl, token)
             const onMessageReceive = (message: GameServerMessage) => {
                 //console.log('message received: ', message)
-                if (message.type === 'gamestate') {
-                    setClientGameData(message.data)
-                } else if (message.type === 'gameover') {
-                    console.log('game is over!')
-                } else if (message.type === 'playerid') {
-                    console.log('set playerid to ', message.data.playerId)
-                    setPlayerId(message.data.playerId)
+                if (isServerLobbyMessage(message)) {
+                    if (message.type === 'lobbystate') {
+                        console.log('lobby state set to ', message.data)
+                        setPlayers(message.data.players)
+                        setMap(message.data.map)
+                    } else if (message.type === 'playerid') {
+                        console.log('set playerid to ', message.data.playerId)
+                        setPlayerId(message.data.playerId)
+                    }
+                } else {
+                    if (message.type === 'gamestate') {
+                        setClientGameData(message.data)
+                    } else if (message.type === 'gameover') {
+                        console.log('game is over!')
+                    }
                 }
             }
             spreadGameClient.current.setReceiver(onMessageReceive)
