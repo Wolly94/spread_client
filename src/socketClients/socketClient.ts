@@ -1,4 +1,4 @@
-import ClientMessage from '../clientMessage'
+import ClientMessage from '../shared/clientMessage'
 
 class SocketClient<TReceiveMessage, TSenderMessageData> {
     socket: WebSocket
@@ -16,7 +16,7 @@ class SocketClient<TReceiveMessage, TSenderMessageData> {
             this.onConnect()
         }
         this.socket.onmessage = (event) => {
-            const data: TReceiveMessage = JSON.parse(event.data)
+            const data: TReceiveMessage = JSON.parse(event.data.toString())
             if (this.onReceiveMessage != null) this.onReceiveMessage(data)
         }
         this.socket.onclose = () => {

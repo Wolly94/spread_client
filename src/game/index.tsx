@@ -12,7 +12,7 @@ import GameServerMessage, {
     ClientLobbyState,
     isServerLobbyMessage,
 } from '../shared/inGame/gameServerMessages'
-import SocketClient from '../shared/socketClients/socketClient'
+import SocketClient from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'
 
