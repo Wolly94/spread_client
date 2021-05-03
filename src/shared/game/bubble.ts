@@ -1,4 +1,7 @@
 import Cell from './cell'
+import { unitsToRadius } from './common'
+
+var bubbleIds = 0
 
 export default class Bubble {
     id: number
@@ -16,15 +19,21 @@ export default class Bubble {
         units: number,
         motherId: number,
     ) {
-        this.id = 1
+        this.id = bubbleIds
+        bubbleIds += 1
         this.playerId = playerId
         this.position = position
         this.direction = direction
         this.units = units
-        this.radius = 25
         this.motherId = motherId
-        this.speed = 50
+        this.speed = 100
+        this.radius = unitsToRadius(units)
     }
+
+    updateRadius() {
+        this.radius = unitsToRadius(this.units)
+    }
+
     // return [this did survive?, remainingEnemy]
     collide(enemy: Bubble): [boolean, Bubble | null] {
         // TODO modify 'this' accordingly
@@ -34,13 +43,19 @@ export default class Bubble {
             return [false, null]
         } else if (result > 0) {
             this.units = result
+            this.updateRadius()
             return [true, null]
         } else {
             enemy.units = -result
+            enemy.updateRadius()
             return [false, enemy]
         }
     }
     overlaps(other: Bubble | Cell) {
+        const y =
+            (this.position[0] - other.position[0]) ** 2 +
+                (this.position[1] - other.position[1]) ** 2 <=
+            Math.max(this.radius, other.radius) ** 2
         return (
             (this.position[0] - other.position[0]) ** 2 +
                 (this.position[1] - other.position[1]) ** 2 <=
