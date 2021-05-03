@@ -6,7 +6,6 @@ import { isApiError } from './api/base'
 import requestToken from './api/token'
 import authProvider from './auth/authProvider'
 import FindGame from './components/FindGame'
-import Game from './components/Game'
 import MyButton from './components/MyButton'
 import gameProvider from './gameProvider'
 import { PATHS } from './Routes'
@@ -58,8 +57,6 @@ const App: React.FC<AppProps> = (props) => {
                     }}
                 ></FindGame>
             )
-        } else {
-            return <Game token={token} gameSocketUrl={gameSocketUrl}></Game>
         }
     }
 
