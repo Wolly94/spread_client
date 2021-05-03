@@ -10,7 +10,7 @@ import FindGameClientMessageData from '../shared/findGame/findGameClientMessages
 import FindGameServerMessage, {
     OpenGame,
 } from '../shared/findGame/findGameServerMessages'
-import SocketClient from '../socketClients/socketClient'
+import SocketClient from '../shared/socketClients/socketClient'
 import MyButton from './MyButton'
 import { OpenGamesFC } from './OpenGame'
 
