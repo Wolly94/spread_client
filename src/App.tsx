@@ -24,7 +24,6 @@ const useStyles = makeStyles({
 interface AppProps {}
 
 const App: React.FC<AppProps> = (props) => {
-    gameProvider.clear()
     const history = useHistory()
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())

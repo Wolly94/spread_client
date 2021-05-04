@@ -16,6 +16,7 @@ import SocketClient from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'
 
+// handles socket communication with gameserver
 const Game = () => {
     const history = useHistory()
     const spreadGameClient = useRef<SocketClient<
@@ -59,10 +60,12 @@ const Game = () => {
             spreadGameClient.current.setReceiver(onMessageReceive)
             setRefresh(refresh + 1)
         }
-        /*         return () => {
-            if (spreadGameClient.current !== null)
+        return () => {
+            if (spreadGameClient.current !== null) {
                 spreadGameClient.current.close()
-        } */
+                spreadGameClient.current = null
+            }
+        }
     })
 
     const subView = () => {
