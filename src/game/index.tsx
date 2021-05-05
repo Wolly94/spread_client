@@ -66,7 +66,7 @@ const Game = () => {
                 spreadGameClient.current = null
             }
         }
-    })
+    }, [])
 
     const subView = () => {
         if (
