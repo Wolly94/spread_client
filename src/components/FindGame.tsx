@@ -5,7 +5,6 @@ import { useHistory } from 'react-router-dom'
 import { isApiError } from '../api/base'
 import { createGameRequest, getFindGameServer } from '../api/gameApi'
 import gameProvider from '../gameProvider'
-import { PATHS } from '../Routes'
 import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
 import FindGameServerMessage, {
     OpenGame,
@@ -107,12 +106,12 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             <Grid container spacing={4} className={classes.root}>
                 <Grid item>
                     <MyButton
-                        disabled={selectedUrl == null}
+                        disabled={selectedUrl === null}
                         className={classes.startGameButton}
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                            if (selectedUrl != null) {
+                            if (selectedUrl !== null) {
                                 joinGame(selectedUrl)
                             }
                         }}
