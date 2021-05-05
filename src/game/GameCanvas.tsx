@@ -66,7 +66,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 }
             }
         },
-        [selectedCellIds, mouseDown, playerId],
+        [selectedCellIds, mouseDown, playerId, cellBelowCursor],
     )
 
     const onMouseUp = useCallback(
@@ -88,7 +88,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             setMouseDown(false)
             setSelectedCellIds([])
         },
-        [mouseDown, cellBelowCursor, props],
+        [mouseDown, cellBelowCursor, props, selectedCellIds],
     )
 
     // update mouse event methods on change

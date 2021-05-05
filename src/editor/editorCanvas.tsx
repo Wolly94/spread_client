@@ -37,6 +37,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     const [mouseDownProps, setMouseDownProps] = useState<MouseDownProps | null>(
         null,
     )
+    const getCanvasRect = useCallback(() => {
+        if (canvasRef.current !== null) {
+            const rect = canvasRef.current.getBoundingClientRect()
+            return rect
+        } else {
+            return null
+        }
+    }, [])
     //const [map, setMap] = useState(props.map)
     const selectedCell = useMemo(() => {
         const c = map.cells.find((cell) => cell.id === selectedCellId)
@@ -88,7 +96,11 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     )
 
     const onMouseDown = useCallback(
-        (x: number, y: number) => {
+        (ev: MouseEvent) => {
+            const canvasRect = getCanvasRect()
+            if (canvasRect === null) return
+            const x = ev.x - canvasRect.left
+            const y = ev.y - canvasRect.top
             const cell = map.cells.find((c) => entityContainsPoint(c, [x, y]))
             if (cell !== undefined) {
                 setMouseDownProps({
@@ -109,16 +121,20 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 }
             }
         },
-        [map, createCell, selectedCell],
+        [map, createCell, selectedCell, getCanvasRect],
     )
 
     const onMouseMove = useCallback(
-        (x: number, y: number) => {
+        (ev: MouseEvent) => {
             if (
                 selectedCell !== null &&
                 mouseDownProps !== null &&
                 mouseDownProps.clickedEntityCenter !== null
             ) {
+                const canvasRect = getCanvasRect()
+                if (canvasRect === null) return
+                const x = ev.x - canvasRect.left
+                const y = ev.y - canvasRect.top
                 const diff = [
                     x - mouseDownProps.position[0],
                     y - mouseDownProps.position[1],
@@ -146,23 +162,19 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 setMouseDownProps(null)
             }
         },
-        [mouseDownProps, removeCell, selectedCell, updateCell],
+        [mouseDownProps, removeCell, selectedCell, updateCell, getCanvasRect],
     )
 
-    const onMouseUp = useCallback((x: number, y: number) => {
+    const onMouseUp = useCallback((ev: MouseEvent) => {
         setMouseDownProps(null)
     }, [])
 
     useEffect(() => {
         if (canvasRef.current != null) {
             const canvas = canvasRef.current
-            const rect = canvas.getBoundingClientRect()
-            canvas.onmousedown = (ev) =>
-                onMouseDown(ev.x - rect.left, ev.y - rect.top)
-            canvas.onmousemove = (ev) =>
-                onMouseMove(ev.x - rect.left, ev.y - rect.top)
-            canvas.onmouseup = (ev) =>
-                onMouseUp(ev.x - rect.left, ev.y - rect.top)
+            canvas.onmousedown = (ev) => onMouseDown(ev)
+            canvas.onmousemove = (ev) => onMouseMove(ev)
+            canvas.onmouseup = (ev) => onMouseUp(ev)
             const context = canvas.getContext('2d')
             if (context != null) {
                 context.clearRect(0, 0, width, height)
