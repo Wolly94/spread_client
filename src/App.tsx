@@ -39,6 +39,8 @@ const App: React.FC<AppProps> = (props) => {
                     console.log('set token to: ' + res.token)
                     authProvider.setToken(res.token)
                     setToken(res.token)
+                } else {
+                    console.log(res.errorMessage)
                 }
             })
         }
