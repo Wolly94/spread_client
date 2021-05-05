@@ -67,7 +67,6 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
             } else {
                 setStatus(errorMessage)
             }
-            setSubmitting(false)
         },
     })
 
@@ -146,7 +145,8 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                 value={formik.values.playerId}
                 onChange={(e) => {
                     formik.handleChange(e)
-                    formik.submitForm()
+                    //formik.submitForm()
+                    formik.handleSubmit()
                 }}
                 onBlur={formik.handleBlur}
                 style={{ display: 'block' }}

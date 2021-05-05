@@ -55,16 +55,31 @@ export const availableSpace = (map: SpreadMap, cell: MapCell) => {
 
 // modifies cell
 export const adjustCellValues = (map: SpreadMap, cell: MapCell) => {
-    cell.radius = Math.floor(cell.radius)
     cell.units = Math.floor(cell.units)
-    cell.position = [Math.floor(cell.position[0]), Math.floor(cell.position[1])]
-    if (cell.radius < mapDefaults.minRadius) return 'Radius too small!'
-    const space = availableSpace(map, cell)
-    if (space < mapDefaults.minRadius) {
-        return 'Not enough space!'
+
+    const existingCell = map.cells.find((c) => c.id === cell.id)
+    if (
+        // in this case you dont need to calculate the space
+        existingCell !== undefined &&
+        existingCell.radius === cell.radius &&
+        existingCell.position[0] === cell.position[0] &&
+        existingCell.position[1] === cell.position[1]
+    ) {
+        return null
+    } else {
+        cell.radius = Math.floor(cell.radius)
+        cell.position = [
+            Math.floor(cell.position[0]),
+            Math.floor(cell.position[1]),
+        ]
+        if (cell.radius < mapDefaults.minRadius) return 'Radius too small!'
+        const space = availableSpace(map, cell)
+        if (space < mapDefaults.minRadius) {
+            return 'Not enough space!'
+        }
+        cell.radius = Math.min(space, cell.radius)
+        return null
     }
-    cell.radius = Math.min(space, cell.radius)
-    return null
 }
 
 export const updateCellInMap = (
