@@ -18,10 +18,14 @@ export enum HttpVerb {
 const headers = () => {
     const token = authProvider.getToken()
     if (token == null) {
-        return { 'Content-Type': 'text/plain' }
+        return {
+            'Content-Type': 'text/plain',
+            'Access-Control-Allow-Origin': '*',
+        }
     } else {
         return {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
             Authorization: 'Basic ' + authProvider.getToken(),
         }
     }

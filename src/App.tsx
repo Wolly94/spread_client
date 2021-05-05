@@ -36,6 +36,7 @@ const App: React.FC<AppProps> = (props) => {
             gameProvider.clear()
             requestToken().then((res) => {
                 if (!isApiError(res)) {
+                    console.log('set token to: ' + res.token)
                     authProvider.setToken(res.token)
                     setToken(res.token)
                 }
