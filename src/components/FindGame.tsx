@@ -1,10 +1,8 @@
 import { Box, Grid, makeStyles } from '@material-ui/core'
 import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 import { isApiError } from '../api/base'
 import { createGameRequest, getFindGameServer } from '../api/gameApi'
-import gameProvider from '../gameProvider'
 import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
 import FindGameServerMessage, {
     OpenGame,
@@ -36,9 +34,8 @@ interface FindGameProps {
 }
 
 const FindGame: React.FC<FindGameProps> = (props) => {
-    const history = useHistory()
     const classes = useStyles()
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+    const { enqueueSnackbar /*, closeSnackbar*/ } = useSnackbar()
     const [openGames, setOpenGames] = useState<OpenGame[] | null>(null)
     const [selectedUrl, setSelectedUrl] = useState<string | null>(null)
     const findGameClient = useRef<SocketClient<

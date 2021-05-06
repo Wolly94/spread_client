@@ -1,13 +1,7 @@
-import { OpenGame } from '../shared/findGame/findGameServerMessages'
 import {
     Box,
-    Card,
-    CardContent,
     Grid,
-    List,
-    ListItem,
     makeStyles,
-    Paper,
     Table,
     TableCell,
     TableRow,
@@ -15,6 +9,7 @@ import {
 } from '@material-ui/core'
 import clsx from 'clsx'
 import React, { useState } from 'react'
+import { OpenGame } from '../shared/findGame/findGameServerMessages'
 
 const useStyles = makeStyles((theme) => ({
     tableRow: {

@@ -4,10 +4,9 @@ import { drawEntity } from '../drawing/draw'
 import { entityContainsPoint } from '../shared/game/entites'
 import { SpreadMap } from '../shared/game/map'
 import { ClientCell, ClientGameState } from '../shared/inGame/clientGameState'
-import GameClientMessageData, {
+import {
     ClientInGameMessage,
     SendUnits,
-    SendUnitsMessage,
 } from '../shared/inGame/gameClientMessages'
 
 interface GameCanvasProps {

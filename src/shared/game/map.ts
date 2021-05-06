@@ -132,7 +132,6 @@ export const getPlayerIds = (map: SpreadMap) => {
 }
 
 export const validateMap = (map: SpreadMap) => {
-    let error = null
     let message = ''
     if (typeof map.width !== 'number' || typeof map.height !== 'number') {
         message = 'invalid sizes or playercount: set to default'
@@ -140,7 +139,8 @@ export const validateMap = (map: SpreadMap) => {
         map.height = mapDefaults.height
     }
     if (!Array.isArray(map.cells)) {
-        error = 'cells are not given as array'
+        message += 'cells are not given as array'
+        map.cells = []
     }
     let m: SpreadMap = { ...map }
     for (var i = 0; i < map.cells.length; i++) {

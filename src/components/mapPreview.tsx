@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core'
 import React, { useEffect, useRef } from 'react'
-import { drawEntity, drawEntityScaled } from '../drawing/draw'
+import { drawEntityScaled } from '../drawing/draw'
 import { SpreadMap } from '../shared/game/map'
 
 interface MapPreviewProps {
@@ -18,9 +18,7 @@ const MapPreview: React.FC<MapPreviewProps> = (props) => {
             props.map.height / props.height,
         )
         if (canvasRef.current != null) {
-            const canvas = canvasRef.current
-            const rect = canvas.getBoundingClientRect()
-            const context = canvas.getContext('2d')
+            const context = canvasRef.current.getContext('2d')
             if (context != null) {
                 context.clearRect(0, 0, props.width, props.height)
                 props.map.cells.forEach((cell) => {

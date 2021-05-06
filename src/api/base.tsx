@@ -1,6 +1,5 @@
 import axios, { CancelToken } from 'axios'
 import { useEffect, useState } from 'react'
-import authProvider from '../auth/authProvider'
 
 export interface ApiError {
     errorMessage: string
@@ -15,20 +14,9 @@ export enum HttpVerb {
     POST = 'POST',
 }
 
-const headers = () => {
-    const token = authProvider.getToken()
-    if (token == null) {
-        return {
-            'Content-Type': 'text/plain',
-            'Access-Control-Allow-Origin': '*',
-        }
-    } else {
-        return {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            Authorization: 'Basic ' + authProvider.getToken(),
-        }
-    }
+const headers = {
+    'Content-Type': 'text/plain',
+    'Access-Control-Allow-Origin': '*',
 }
 
 export const apiRequest = <T,>(
@@ -42,6 +30,7 @@ export const apiRequest = <T,>(
         url: url,
         data: data,
         cancelToken: cancelToken,
+        headers: headers,
     })
         .then((res) => {
             return res.data as T

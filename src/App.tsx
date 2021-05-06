@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { isApiError } from './api/base'
 import requestToken from './api/token'
@@ -27,13 +27,18 @@ const App: React.FC<AppProps> = (props) => {
     const history = useHistory()
     const classes = useStyles()
     const [token, setToken] = useState(authProvider.getToken())
-    const [gameSocketUrl, setGameSocketUrl] = useState(
-        gameProvider.getSocketUrl(),
+
+    const joinGame = useCallback(
+        (url: string) => {
+            gameProvider.setSocketUrl(url)
+            history.push(PATHS.game)
+        },
+        [history],
     )
 
     useEffect(() => {
+        gameProvider.clear()
         if (token == null) {
-            gameProvider.clear()
             requestToken().then((res) => {
                 if (!isApiError(res)) {
                     console.log('set token to: ' + res.token)
@@ -47,17 +52,23 @@ const App: React.FC<AppProps> = (props) => {
     }, [token])
 
     const subView = () => {
+        const gameUrl = gameProvider.getSocketUrl()
         if (token == null) {
             return <label>Retrieving token ...</label>
-        } else if (gameSocketUrl == null) {
+        } else if (gameUrl === null) {
             return (
                 <FindGame
                     token={token}
                     onSetSocketUrl={(url) => {
-                        gameProvider.setSocketUrl(url)
-                        history.push(PATHS.game)
+                        joinGame(url)
                     }}
                 ></FindGame>
+            )
+        } else {
+            return (
+                <MyButton onClick={() => joinGame(gameUrl)}>
+                    Join your running game
+                </MyButton>
             )
         }
     }

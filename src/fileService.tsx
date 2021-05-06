@@ -25,7 +25,6 @@ export const ReadFile: React.FC<ReadFileProps> = (props) => {
             const data = evt.target.result
             props.handleInput(data.toString())
         }
-        const value = inputFileRef.current.value
         inputFileRef.current.value = ''
     }
     return (

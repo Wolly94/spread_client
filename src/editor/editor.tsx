@@ -1,17 +1,12 @@
-import MyButton from '../components/MyButton'
-import React, { useState } from 'react'
 import { Box, Grid, makeStyles } from '@material-ui/core'
+import React, { useState } from 'react'
 import { useHistory } from 'react-router'
+import MyButton from '../components/MyButton'
+import { ReadFile, saveFile } from '../fileService'
 import { PATHS } from '../Routes'
-import EditorCanvas from './editorCanvas'
-import { ReadFile, saveFile, SaveFile } from '../fileService'
-import {
-    emptyMap,
-    exampleMap,
-    SpreadMap,
-    validateMap,
-} from '../shared/game/map'
+import { emptyMap, SpreadMap, validateMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
+import EditorCanvas from './editorCanvas'
 
 const useStyles = makeStyles({
     centered: {

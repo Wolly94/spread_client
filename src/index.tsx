@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { SnackbarProvider } from 'notistack'
 import { BrowserRouter as Router } from 'react-router-dom'
