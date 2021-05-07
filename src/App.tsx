@@ -38,7 +38,7 @@ const App: React.FC<AppProps> = (props) => {
 
     useEffect(() => {
         gameProvider.clear()
-        if (token == null) {
+        if (token === null) {
             requestToken().then((res) => {
                 if (!isApiError(res)) {
                     console.log('set token to: ' + res.token)
@@ -75,7 +75,14 @@ const App: React.FC<AppProps> = (props) => {
 
     return (
         <Box className={classes.centered}>
-            <MyButton onClick={() => setToken(null)}>Reset Token</MyButton>
+            <MyButton
+                onClick={() => {
+                    authProvider.clear()
+                    setToken(null)
+                }}
+            >
+                Reset Token
+            </MyButton>
             <MyButton onClick={() => history.push(PATHS.editor)}>
                 Create your own Map
             </MyButton>
