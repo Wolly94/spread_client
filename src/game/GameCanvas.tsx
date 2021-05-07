@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { drawEntity } from '../drawing/draw'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { drawEntityScaled } from '../drawing/draw'
 import { entityContainsPoint } from '../shared/game/entites'
 import { SpreadMap } from '../shared/game/map'
 import { ClientCell, ClientGameState } from '../shared/inGame/clientGameState'
@@ -25,6 +25,35 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const [selectedCellIds, setSelectedCellIds] = useState<number[]>([])
     const [mouseDown, setMouseDown] = useState(false)
 
+    const scaleFactor = useMemo(() => {
+        const ratio = Math.max(
+            window.screen.width / props.map.width,
+            window.screen.height / props.map.height,
+        )
+        return ratio * 0.8
+    }, [props.map])
+    console.log(window.screen.width, window.screen.height)
+
+    const getCanvasRect = useCallback(() => {
+        if (canvasRef.current !== null) {
+            const rect = canvasRef.current.getBoundingClientRect()
+            return rect
+        } else {
+            return null
+        }
+    }, [])
+
+    const getMapCoordinates = useCallback(
+        (ev: MouseEvent): [number, number] => {
+            const canvasRect = getCanvasRect()
+            if (canvasRect === null) return [ev.x, ev.y]
+            const x = (ev.x - canvasRect.left) / scaleFactor
+            const y = (ev.y - canvasRect.top) / scaleFactor
+            return [x, y]
+        },
+        [getCanvasRect, scaleFactor],
+    )
+
     const cellBelowCursor = useCallback(
         (x: number, y: number): ClientCell | null => {
             const cell = clientGameState.cells.find((c) =>
@@ -37,8 +66,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     )
 
     const onMouseDown = useCallback(
-        (x: number, y: number) => {
-            console.log(x, y)
+        (ev: MouseEvent) => {
+            const [x, y] = getMapCoordinates(ev)
             const cell = cellBelowCursor(x, y)
             if (cell != null && cell.playerId === playerId) {
                 setMouseDown(true)
@@ -48,11 +77,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 setSelectedCellIds([])
             }
         },
-        [cellBelowCursor, playerId],
+        [cellBelowCursor, playerId, getMapCoordinates],
     )
 
     const onMouseMove = useCallback(
-        (x: number, y: number) => {
+        (ev: MouseEvent) => {
+            const [x, y] = getMapCoordinates(ev)
             if (mouseDown && selectedCellIds.length > 0) {
                 const cell = cellBelowCursor(x, y)
                 if (
@@ -65,11 +95,18 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 }
             }
         },
-        [selectedCellIds, mouseDown, playerId, cellBelowCursor],
+        [
+            selectedCellIds,
+            mouseDown,
+            playerId,
+            cellBelowCursor,
+            getMapCoordinates,
+        ],
     )
 
     const onMouseUp = useCallback(
-        (x: number, y: number) => {
+        (ev: MouseEvent) => {
+            const [x, y] = getMapCoordinates(ev)
             if (mouseDown && selectedCellIds.length > 0) {
                 const cell = cellBelowCursor(x, y)
                 if (cell != null) {
@@ -87,7 +124,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             setMouseDown(false)
             setSelectedCellIds([])
         },
-        [mouseDown, cellBelowCursor, props, selectedCellIds],
+        [mouseDown, cellBelowCursor, props, selectedCellIds, getMapCoordinates],
     )
 
     // update mouse event methods on change
@@ -95,26 +132,23 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     useEffect(() => {
         if (canvasRef.current != null && clientGameState != null) {
             const canvas = canvasRef.current
-            const rect = canvas.getBoundingClientRect()
-            canvas.onmousedown = (ev) =>
-                onMouseDown(ev.x - rect.left, ev.y - rect.top)
-            canvas.onmousemove = (ev) =>
-                onMouseMove(ev.x - rect.left, ev.y - rect.top)
-            canvas.onmouseup = (ev) =>
-                onMouseUp(ev.x - rect.left, ev.y - rect.top)
+            canvas.onmousedown = (ev) => onMouseDown(ev)
+            canvas.onmousemove = (ev) => onMouseMove(ev)
+            canvas.onmouseup = (ev) => onMouseUp(ev)
             const context = canvas.getContext('2d')
             if (context != null) {
                 context.clearRect(0, 0, props.map.width, props.map.height)
                 clientGameState.cells.forEach((cell) => {
-                    drawEntity(
+                    drawEntityScaled(
                         context,
                         cell,
                         selectedCellIds.some((cId) => cId === cell.id),
                         true,
+                        scaleFactor,
                     )
                 })
                 clientGameState.bubbles.forEach((bubble) => {
-                    drawEntity(context, bubble, false, true)
+                    drawEntityScaled(context, bubble, false, true, scaleFactor)
                 })
             }
         }
@@ -127,6 +161,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         onMouseMove,
         playerId,
         props.map,
+        scaleFactor,
     ])
 
     return (
@@ -135,8 +170,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             <canvas
                 style={{ border: '1px solid black' }}
                 ref={canvasRef}
-                height={props.map.height}
-                width={props.map.width}
+                height={props.map.height * scaleFactor}
+                width={props.map.width * scaleFactor}
             />
         </Box>
     )
