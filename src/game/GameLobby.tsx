@@ -2,6 +2,7 @@ import { Box } from '@material-ui/core'
 import React from 'react'
 import MapPreview from '../components/mapPreview'
 import MyButton from '../components/MyButton'
+import { playerColors } from '../drawing/draw'
 import { SpreadMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import {
@@ -35,6 +36,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
     }
     return (
         <Box>
+            <label>Connected Players: tbi</label>
             <MyButton onClick={onSelectMap}>
                 {map !== null ? 'Change Map' : 'Select Map'}
             </MyButton>
