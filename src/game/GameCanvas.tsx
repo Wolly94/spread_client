@@ -12,7 +12,7 @@ import {
 interface GameCanvasProps {
     map: SpreadMap
     clientGameState: ClientGameState
-    playerId: number
+    playerId: number | null
     sendMessageToServer: (message: ClientInGameMessage) => void
 }
 
@@ -131,6 +131,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     return (
         <Box>
+            <label>Player Id: {playerId}</label>
             <canvas
                 style={{ border: '1px solid black' }}
                 ref={canvasRef}

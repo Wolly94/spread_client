@@ -86,7 +86,6 @@ const Game = () => {
 
     const subView = () => {
         if (
-            playerId !== null &&
             clientGameState !== null &&
             map !== null &&
             spreadGameClient.current !== null
