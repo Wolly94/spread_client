@@ -26,13 +26,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const [mouseDown, setMouseDown] = useState(false)
 
     const scaleFactor = useMemo(() => {
-        const ratio = Math.max(
+        const ratio = Math.min(
             window.screen.width / props.map.width,
             window.screen.height / props.map.height,
         )
         return ratio * 0.8
     }, [props.map])
-    console.log(window.screen.width, window.screen.height)
 
     const getCanvasRect = useCallback(() => {
         if (canvasRef.current !== null) {

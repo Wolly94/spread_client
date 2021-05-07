@@ -18,7 +18,7 @@ interface GameLobbyProps {
 
 const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
     const onSelectMap = () => {
-        const randomMap = generate2PlayerMap()
+        const randomMap = generate2PlayerMap(1000)
         const m: SetMapMessage = {
             type: 'setmap',
             data: randomMap,

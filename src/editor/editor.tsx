@@ -49,7 +49,7 @@ const Editor = () => {
     }
 
     const randomMap = () => {
-        const m = generate2PlayerMap()
+        const m = generate2PlayerMap(1000)
         setMap(m)
         setUnselectCell(unselectCell + 1)
     }

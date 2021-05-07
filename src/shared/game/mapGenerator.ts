@@ -13,7 +13,7 @@ const calculateDensity = (map: SpreadMap) => {
     return covered / (map.width * map.height)
 }
 
-export const generate2PlayerMap = () => {
+export const generate2PlayerMap = (squareSideLength: number) => {
     let cellId = 1
     const cellDensity = 0.05
     const cellRadii = [25, 100]
@@ -21,7 +21,9 @@ export const generate2PlayerMap = () => {
     const radiusAccuracy = 5
     let setStartingCells = false
     let map = emptyMap()
-    const half = 500
+    map.width = squareSideLength
+    map.height = squareSideLength
+    const half = squareSideLength / 2
     const mapCenter = [half, half]
     // generate cells on the map
     while (calculateDensity(map) < cellDensity) {
