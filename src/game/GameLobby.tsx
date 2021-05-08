@@ -7,12 +7,18 @@ import { playerColors } from '../drawing/draw'
 import { getPlayerIds, SpreadMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import {
+    ClearSeatMessage,
     ClientLobbyMessage,
+    SeatAiMessage,
     SetMapMessage,
     StartGameMessage,
     TakeSeatMessage,
 } from '../shared/inGame/clientLobbyMessage'
-import { ClientLobbyPlayer } from '../shared/inGame/gameServerMessages'
+import {
+    ClientAiPlayer,
+    ClientHumanPlayer,
+    ClientLobbyPlayer,
+} from '../shared/inGame/gameServerMessages'
 
 interface LobbyCellProps {
     label: string
@@ -26,6 +32,84 @@ const LobbyCell: React.FC<LobbyCellProps> = (props) => {
                 {props.label}
             </Typography>
         </Box>
+    )
+}
+
+interface EmptyRowProps {
+    playerId: number
+    takeSeat: (playerId: number) => void
+    setAi: (playerId: number) => void
+}
+
+const EmptyRow: React.FC<EmptyRowProps> = (props) => {
+    return (
+        <Grid container>
+            <Grid item xs={4}>
+                <LobbyCell
+                    label={'Player ' + (props.playerId + 1).toString()}
+                    backgroundColor={playerColors[props.playerId]}
+                ></LobbyCell>
+            </Grid>
+            <Grid item xs={4}>
+                <button onClick={() => props.takeSeat(props.playerId)}>
+                    <LobbyCell label={'Take'}></LobbyCell>
+                </button>
+            </Grid>
+            <Grid item xs={4}>
+                <button onClick={() => props.setAi(props.playerId)}>
+                    <LobbyCell label={'AI'}></LobbyCell>
+                </button>
+            </Grid>
+        </Grid>
+    )
+}
+
+interface HumanRowProps {
+    player: ClientHumanPlayer
+}
+
+const HumanRow: React.FC<HumanRowProps> = (props) => {
+    return (
+        <Grid container>
+            <Grid item xs={4}>
+                <LobbyCell
+                    label={'Player ' + (props.player.playerId + 1).toString()}
+                    backgroundColor={playerColors[props.player.playerId]}
+                ></LobbyCell>
+            </Grid>
+            <Grid item xs={8}>
+                <LobbyCell label={props.player.name}></LobbyCell>
+            </Grid>
+        </Grid>
+    )
+}
+
+interface AiRowProps {
+    player: ClientAiPlayer
+    takeSeat: (playerId: number) => void
+    clear: (playerId: number) => void
+}
+
+const AiRow: React.FC<AiRowProps> = (props) => {
+    return (
+        <Grid container>
+            <Grid item xs={4}>
+                <LobbyCell
+                    label={'Player ' + (props.player.playerId + 1).toString()}
+                    backgroundColor={playerColors[props.player.playerId]}
+                ></LobbyCell>
+            </Grid>
+            <Grid item xs={4}>
+                <button onClick={() => props.takeSeat(props.player.playerId)}>
+                    <LobbyCell label={'Take'}></LobbyCell>
+                </button>
+            </Grid>
+            <Grid item xs={4}>
+                <button onClick={() => props.clear(props.player.playerId)}>
+                    <LobbyCell label={'Open'}></LobbyCell>
+                </button>
+            </Grid>
+        </Grid>
     )
 }
 
@@ -66,48 +150,50 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         }
         props.sendMessageToServer(message)
     }
+    const setAi = (playerId: number) => {
+        const message: SeatAiMessage = {
+            type: 'seatai',
+            data: { playerId: playerId },
+        }
+        props.sendMessageToServer(message)
+    }
+    const clear = (playerId: number) => {
+        const message: ClearSeatMessage = {
+            type: 'clearseat',
+            data: { playerId: playerId },
+        }
+        props.sendMessageToServer(message)
+    }
 
     const displayPlayers = () => {
         if (map === null) return <Box></Box>
         const playerIds = Array.from(getPlayerIds(map)).sort((a, b) => a - b)
         return (
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
                 {playerIds.map((playerId) => {
-                    let children = [
-                        <Grid item xs={4}>
-                            <LobbyCell
-                                label={'Player ' + (playerId + 1).toString()}
-                                backgroundColor={playerColors[playerId]}
-                            ></LobbyCell>
-                        </Grid>,
-                    ]
                     const seatedPlayer = props.players.find(
                         (pl) => pl.playerId === playerId,
                     )
-                    const comps =
-                        seatedPlayer !== undefined
-                            ? [
-                                  <Grid item xs={8}>
-                                      <LobbyCell
-                                          label={seatedPlayer.name}
-                                      ></LobbyCell>
-                                  </Grid>,
-                              ]
-                            : [
-                                  <Grid item xs={4}>
-                                      <LobbyCell label={'Open'}></LobbyCell>
-                                  </Grid>,
-                                  <Grid item xs={4}>
-                                      <button
-                                          onClick={() => takeSeat(playerId)}
-                                      >
-                                          <LobbyCell label={'Take'}></LobbyCell>
-                                      </button>
-                                  </Grid>,
-                              ]
-
-                    children = children.concat(comps)
-                    return children
+                    if (seatedPlayer === undefined) {
+                        return (
+                            <EmptyRow
+                                playerId={playerId}
+                                takeSeat={takeSeat}
+                                setAi={setAi}
+                            ></EmptyRow>
+                        )
+                    } else if (seatedPlayer.type === 'ai') {
+                        return (
+                            <AiRow
+                                player={seatedPlayer}
+                                takeSeat={takeSeat}
+                                clear={clear}
+                            ></AiRow>
+                        )
+                    } else {
+                        // if (seatedPlayer.type === 'human') {
+                        return <HumanRow player={seatedPlayer}></HumanRow>
+                    }
                 })}
             </Grid>
         )
