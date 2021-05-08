@@ -17,7 +17,7 @@ export const generate2PlayerMap = (squareSideLength: number) => {
     let cellId = 1
     const cellDensity = 0.05
     const cellRadii = [25, 100]
-    const playerDist = [5, 3, 1] // 5 null : 3 owner of side : 1 owner of other side
+    const playerDist = [12, 3, 1] // 12 null : 3 owner of side : 1 owner of other side
     const radiusAccuracy = 5
     let setStartingCells = false
     let map = emptyMap()
