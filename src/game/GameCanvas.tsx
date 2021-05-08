@@ -7,7 +7,7 @@ import { ClientCell, ClientGameState } from '../shared/inGame/clientGameState'
 import {
     ClientInGameMessage,
     SendUnits,
-} from '../shared/inGame/gameClientMessages'
+} from '../shared/inGame/clientInGameMessage'
 
 interface GameCanvasProps {
     map: SpreadMap

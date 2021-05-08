@@ -10,7 +10,8 @@ import {
     ClientLobbyMessage,
     SetMapMessage,
     StartGameMessage,
-} from '../shared/inGame/gameClientMessages'
+    TakeSeatMessage,
+} from '../shared/inGame/clientLobbyMessage'
 import { ClientLobbyPlayer } from '../shared/inGame/gameServerMessages'
 
 interface LobbyCellProps {
@@ -49,6 +50,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         const randomMap = generate2PlayerMap(1000)
         selectMap(randomMap)
     }
+
     const startGame = () => {
         const m: StartGameMessage = {
             type: 'startgame',
@@ -56,8 +58,13 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         }
         props.sendMessageToServer(m)
     }
+
     const takeSeat = (playerId: number) => {
-        const x = 10
+        const message: TakeSeatMessage = {
+            type: 'takeseat',
+            data: { playerId: playerId },
+        }
+        props.sendMessageToServer(message)
     }
 
     const displayPlayers = () => {
