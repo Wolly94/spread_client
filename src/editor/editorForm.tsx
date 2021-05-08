@@ -3,7 +3,13 @@ import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
 import MyButton from '../components/MyButton'
-import { MapCell, mapDefaults, SpreadMap } from '../shared/game/map'
+import { radiusToUnits } from '../shared/game/common'
+import {
+    availableSpace,
+    MapCell,
+    mapDefaults,
+    SpreadMap,
+} from '../shared/game/map'
 
 const neutralPlayerId = -1
 
@@ -51,11 +57,14 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                 props.removeCell(props.selectedCell.id)
                 return
             }
+            const maxRadius = availableSpace(props.map, props.selectedCell)
+            const radius = Math.min(maxRadius, values.radius)
+            const units = Math.min(2 * radiusToUnits(radius), values.units)
             const newSelectedCell: MapCell = {
                 ...props.selectedCell,
                 position: [values.xCoord, values.yCoord],
-                units: values.units,
-                radius: values.radius,
+                units: units,
+                radius: radius,
                 playerId:
                     values.playerId === neutralPlayerId
                         ? null
