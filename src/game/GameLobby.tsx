@@ -99,12 +99,15 @@ const AiRow: React.FC<AiRowProps> = (props) => {
                     backgroundColor={playerColors[props.player.playerId]}
                 ></LobbyCell>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
+                <LobbyCell label={'AI'}></LobbyCell>
+            </Grid>
+            <Grid item xs={3}>
                 <button onClick={() => props.takeSeat(props.player.playerId)}>
                     <LobbyCell label={'Take'}></LobbyCell>
                 </button>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <button onClick={() => props.clear(props.player.playerId)}>
                     <LobbyCell label={'Open'}></LobbyCell>
                 </button>
