@@ -9,6 +9,7 @@ import {
     MapCell,
     mapDefaults,
     SpreadMap,
+    updateCellInMap,
 } from '../shared/game/map'
 
 const neutralPlayerId = -1
@@ -24,7 +25,7 @@ interface MapCellFormValues {
 interface EditorFormProps {
     selectedCell: MapCell
     map: SpreadMap
-    updateSelectedCell: (mapCell: MapCell) => string | null
+    setMap: React.Dispatch<React.SetStateAction<SpreadMap>>
     removeCell: (cellId: number) => void
 }
 
@@ -70,11 +71,12 @@ const EditorForm: React.FC<EditorFormProps> = (props) => {
                         ? null
                         : values.playerId,
             }
-            const errorMessage = props.updateSelectedCell(newSelectedCell)
-            if (errorMessage === null) {
+            const r = updateCellInMap(newSelectedCell, props.map)
+            props.setMap(r.map)
+            if (r.error === null) {
                 resetForm()
             } else {
-                setStatus(errorMessage)
+                setStatus(r.error)
             }
         },
     })

@@ -203,9 +203,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
                     <EditorForm
                         selectedCell={selectedCell}
                         map={map}
-                        updateSelectedCell={(selCell) => {
-                            return updateCell(selCell)
-                        }}
+                        setMap={setMap}
                         removeCell={removeCell}
                     ></EditorForm>
                 </Box>
