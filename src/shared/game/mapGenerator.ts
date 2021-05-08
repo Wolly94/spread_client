@@ -1,4 +1,13 @@
-import { addCellToMap, emptyMap, MapCell, SpreadMap } from './map'
+import {
+    addCellToMap,
+    availableSpace,
+    availableSpaceFromPosition,
+    emptyMap,
+    MapCell,
+    SpreadMap,
+} from './map'
+
+const minDistance = 10
 
 function getRandomIntInclusive(min: number, max: number) {
     min = Math.ceil(min)
@@ -40,7 +49,7 @@ export const generate2PlayerMap = (squareSideLength: number) => {
         } else {
             playerId = 1
         }
-        const radius =
+        let radius =
             getRandomIntInclusive(
                 cellRadii[0] / radiusAccuracy,
                 cellRadii[1] / radiusAccuracy,
@@ -48,6 +57,8 @@ export const generate2PlayerMap = (squareSideLength: number) => {
         const units = getRandomIntInclusive(radius / 8, radius)
         let x = getRandomIntInclusive(0, half)
         let y = getRandomIntInclusive(0, 2 * half)
+        const avSpace = availableSpaceFromPosition(map, [x, y])
+        radius = Math.min(avSpace - minDistance, radius)
         if ((x - mapCenter[0]) ** 2 + (y - mapCenter[1]) ** 2 <= radius ** 2) {
             x = mapCenter[0]
             y = mapCenter[1]

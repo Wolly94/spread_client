@@ -38,19 +38,40 @@ export const mapDefaults = {
     maxPlayers: 4,
 }
 
+export const distanceToBoundary = (
+    map: SpreadMap,
+    position: [number, number],
+) => {
+    return Math.min(
+        position[0],
+        position[1],
+        map.width - position[0],
+        map.height - position[1],
+    )
+}
+
+const distanceToCells = (cells: MapCell[], position: [number, number]) => {
+    return Math.min(...cells.map((c) => distanceToEntity(c, position)))
+}
+
+export const availableSpaceFromPosition = (
+    map: SpreadMap,
+    position: [number, number],
+) => {
+    return Math.min(
+        distanceToBoundary(map, position),
+        distanceToCells(map.cells, position),
+    )
+}
+
 export const availableSpace = (map: SpreadMap, cell: MapCell) => {
-    const availableSpace = Math.floor(
-        Math.min(
-            cell.position[0],
-            cell.position[1],
-            map.width - cell.position[0],
-            map.height - cell.position[1],
-            ...map.cells
-                .filter((c) => c.id !== cell.id)
-                .map((c) => distanceToEntity(c, cell.position)),
+    return Math.min(
+        distanceToBoundary(map, cell.position),
+        distanceToCells(
+            map.cells.filter((c) => c.id !== cell.id),
+            cell.position,
         ),
     )
-    return availableSpace
 }
 
 // modifies cell
