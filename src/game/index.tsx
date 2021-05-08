@@ -30,7 +30,7 @@ const Game = () => {
     const [map, setMap] = useState<SpreadMap | null>(null)
     const [playerId, setPlayerId] = useState<number | null>(null)
     const [, setRefresh] = React.useState(0)
-    const [, /*players, */ setPlayers] = useState<ClientLobbyPlayer[]>([])
+    const [players, setPlayers] = useState<ClientLobbyPlayer[]>([])
 
     const disconnectFromGame = useCallback(() => {
         gameProvider.clear()
@@ -105,6 +105,7 @@ const Game = () => {
             return (
                 <GameLobby
                     map={map}
+                    players={players}
                     setMap={setMap}
                     sendMessageToServer={(msg) => {
                         if (spreadGameClient.current !== null)

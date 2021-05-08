@@ -1,20 +1,37 @@
-import { Box } from '@material-ui/core'
+import { Box, Button, Grid, Typography } from '@material-ui/core'
 import React from 'react'
 import MapPreview from '../components/mapPreview'
 import MyButton from '../components/MyButton'
 import ReadMap from '../components/ReadMap'
 import { playerColors } from '../drawing/draw'
-import { SpreadMap } from '../shared/game/map'
+import { getPlayerIds, SpreadMap } from '../shared/game/map'
 import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import {
     ClientLobbyMessage,
     SetMapMessage,
     StartGameMessage,
 } from '../shared/inGame/gameClientMessages'
+import { ClientLobbyPlayer } from '../shared/inGame/gameServerMessages'
+
+interface LobbyCellProps {
+    label: string
+    backgroundColor?: string | undefined
+}
+
+const LobbyCell: React.FC<LobbyCellProps> = (props) => {
+    return (
+        <Box bgcolor={props.backgroundColor}>
+            <Typography variant="h4" component="h5">
+                {props.label}
+            </Typography>
+        </Box>
+    )
+}
 
 interface GameLobbyProps {
     map: SpreadMap | null
     setMap: React.Dispatch<React.SetStateAction<SpreadMap | null>>
+    players: ClientLobbyPlayer[]
     sendMessageToServer: (message: ClientLobbyMessage) => void
 }
 
@@ -39,6 +56,55 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         }
         props.sendMessageToServer(m)
     }
+    const takeSeat = (playerId: number) => {
+        const x = 10
+    }
+
+    const displayPlayers = () => {
+        if (map === null) return <Box></Box>
+        const playerIds = Array.from(getPlayerIds(map)).sort((a, b) => a - b)
+        return (
+            <Grid container spacing={2}>
+                {playerIds.map((playerId) => {
+                    let children = [
+                        <Grid item xs={4}>
+                            <LobbyCell
+                                label={'Player ' + (playerId + 1).toString()}
+                                backgroundColor={playerColors[playerId]}
+                            ></LobbyCell>
+                        </Grid>,
+                    ]
+                    const seatedPlayer = props.players.find(
+                        (pl) => pl.playerId === playerId,
+                    )
+                    const comps =
+                        seatedPlayer !== undefined
+                            ? [
+                                  <Grid item xs={8}>
+                                      <LobbyCell
+                                          label={seatedPlayer.name}
+                                      ></LobbyCell>
+                                  </Grid>,
+                              ]
+                            : [
+                                  <Grid item xs={4}>
+                                      <LobbyCell label={'Open'}></LobbyCell>
+                                  </Grid>,
+                                  <Grid item xs={4}>
+                                      <button
+                                          onClick={() => takeSeat(playerId)}
+                                      >
+                                          <LobbyCell label={'Take'}></LobbyCell>
+                                      </button>
+                                  </Grid>,
+                              ]
+
+                    children = children.concat(comps)
+                    return children
+                })}
+            </Grid>
+        )
+    }
     return (
         <Box>
             <label>Connected Players: tbi</label>
@@ -55,7 +121,18 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
                     Start Game
                 </MyButton>
                 {map !== null && (
-                    <MapPreview map={map} width={500} height={500}></MapPreview>
+                    <Grid container spacing={2}>
+                        <Grid item>
+                            <MapPreview
+                                map={map}
+                                width={500}
+                                height={500}
+                            ></MapPreview>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Box height={500}>{displayPlayers()}</Box>
+                        </Grid>
+                    </Grid>
                 )}
             </Box>
         </Box>
