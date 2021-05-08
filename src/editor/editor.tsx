@@ -2,6 +2,7 @@ import { Box, Grid, makeStyles } from '@material-ui/core'
 import React, { useState } from 'react'
 import { useHistory } from 'react-router'
 import MyButton from '../components/MyButton'
+import ReadMap from '../components/ReadMap'
 import { ReadFile, saveFile } from '../fileService'
 import { PATHS } from '../Routes'
 import { emptyMap, SpreadMap, validateMap } from '../shared/game/map'
@@ -26,11 +27,8 @@ const Editor = () => {
 
     const [map, setMap] = useState(emptyMap())
 
-    const handleRead = (data: string) => {
-        const m: SpreadMap = JSON.parse(data)
-        const r = validateMap(m)
-        console.log(JSON.stringify(r.message))
-        setMap(r.map)
+    const handleRead = (map: SpreadMap) => {
+        setMap(map)
         setUnselectCell(unselectCell + 1)
     }
 
@@ -65,10 +63,11 @@ const Editor = () => {
                         <MyButton onClick={randomMap}>Random Map</MyButton>
                     </Grid>
                     <Grid item xs={3}>
-                        <ReadFile
-                            allowedFileEndings={['.spread']}
-                            handleInput={handleRead}
-                        ></ReadFile>
+                        <ReadMap
+                            callback={(map) => {
+                                if (map !== null) handleRead(map)
+                            }}
+                        ></ReadMap>
                     </Grid>
                     <Grid item xs={3}>
                         <MyButton onClick={handleSave}>Save Map</MyButton>
