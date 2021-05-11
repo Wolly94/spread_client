@@ -152,6 +152,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
                                             players={props.players}
                                             takeSeat={takeSeat}
                                             setAi={setAi}
+                                            clear={clear}
                                         ></DisplayPlayerView>
                                     </Box>
                                 </Grid>

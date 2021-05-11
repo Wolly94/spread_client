@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@material-ui/core'
-import { clear } from 'node:console'
 import React from 'react'
 import { playerColors } from '../drawing/draw'
 import {
@@ -109,6 +108,7 @@ interface DisplayPlayerViewProps {
     players: ClientLobbyPlayer[]
     takeSeat: (playerId: number) => void
     setAi: (playerId: number) => void
+    clear: (playerId: number) => void
 }
 
 const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
@@ -132,7 +132,7 @@ const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
                         <AiRow
                             player={seatedPlayer}
                             takeSeat={props.takeSeat}
-                            clear={clear}
+                            clear={props.clear}
                         ></AiRow>
                     )
                 } else {
