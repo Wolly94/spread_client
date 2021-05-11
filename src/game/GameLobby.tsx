@@ -31,102 +31,8 @@ import {
     GameSettings,
     toGameMechanics,
 } from '../shared/inGame/gameServerMessages'
-
-interface LobbyCellProps {
-    label: string
-    backgroundColor?: string | undefined
-}
-
-const LobbyCell: React.FC<LobbyCellProps> = (props) => {
-    return (
-        <Box bgcolor={props.backgroundColor}>
-            <Typography variant="h4" component="h5">
-                {props.label}
-            </Typography>
-        </Box>
-    )
-}
-
-interface EmptyRowProps {
-    playerId: number
-    takeSeat: (playerId: number) => void
-    setAi: (playerId: number) => void
-}
-
-const EmptyRow: React.FC<EmptyRowProps> = (props) => {
-    return (
-        <Grid container>
-            <Grid item xs={4}>
-                <LobbyCell
-                    label={'Player ' + (props.playerId + 1).toString()}
-                    backgroundColor={playerColors[props.playerId]}
-                ></LobbyCell>
-            </Grid>
-            <Grid item xs={4}>
-                <button onClick={() => props.takeSeat(props.playerId)}>
-                    <LobbyCell label={'Take'}></LobbyCell>
-                </button>
-            </Grid>
-            <Grid item xs={4}>
-                <button onClick={() => props.setAi(props.playerId)}>
-                    <LobbyCell label={'AI'}></LobbyCell>
-                </button>
-            </Grid>
-        </Grid>
-    )
-}
-
-interface HumanRowProps {
-    player: ClientHumanPlayer
-}
-
-const HumanRow: React.FC<HumanRowProps> = (props) => {
-    return (
-        <Grid container>
-            <Grid item xs={4}>
-                <LobbyCell
-                    label={'Player ' + (props.player.playerId + 1).toString()}
-                    backgroundColor={playerColors[props.player.playerId]}
-                ></LobbyCell>
-            </Grid>
-            <Grid item xs={8}>
-                <LobbyCell label={props.player.name}></LobbyCell>
-            </Grid>
-        </Grid>
-    )
-}
-
-interface AiRowProps {
-    player: ClientAiPlayer
-    takeSeat: (playerId: number) => void
-    clear: (playerId: number) => void
-}
-
-const AiRow: React.FC<AiRowProps> = (props) => {
-    return (
-        <Grid container>
-            <Grid item xs={4}>
-                <LobbyCell
-                    label={'Player ' + (props.player.playerId + 1).toString()}
-                    backgroundColor={playerColors[props.player.playerId]}
-                ></LobbyCell>
-            </Grid>
-            <Grid item xs={2}>
-                <LobbyCell label={'AI'}></LobbyCell>
-            </Grid>
-            <Grid item xs={3}>
-                <button onClick={() => props.takeSeat(props.player.playerId)}>
-                    <LobbyCell label={'Take'}></LobbyCell>
-                </button>
-            </Grid>
-            <Grid item xs={3}>
-                <button onClick={() => props.clear(props.player.playerId)}>
-                    <LobbyCell label={'Open'}></LobbyCell>
-                </button>
-            </Grid>
-        </Grid>
-    )
-}
+import GameSettingsView from './GameSettingsView'
+import DisplayPlayerView from './PlayerView'
 
 interface GameLobbyProps {
     map: SpreadMap | null
@@ -190,104 +96,69 @@ const GameLobby: React.FC<GameLobbyProps> = ({
             type: 'gamesettings',
             data: gameSettings,
         }
-    }
-
-    const displayPlayers = () => {
-        if (map === null) return <Box></Box>
-        const playerIds = Array.from(getPlayerIds(map)).sort((a, b) => a - b)
-        return (
-            <Grid container spacing={3}>
-                {playerIds.map((playerId) => {
-                    const seatedPlayer = props.players.find(
-                        (pl) => pl.playerId === playerId,
-                    )
-                    if (seatedPlayer === undefined) {
-                        return (
-                            <EmptyRow
-                                playerId={playerId}
-                                takeSeat={takeSeat}
-                                setAi={setAi}
-                            ></EmptyRow>
-                        )
-                    } else if (seatedPlayer.type === 'ai') {
-                        return (
-                            <AiRow
-                                player={seatedPlayer}
-                                takeSeat={takeSeat}
-                                clear={clear}
-                            ></AiRow>
-                        )
-                    } else {
-                        // if (seatedPlayer.type === 'human') {
-                        return <HumanRow player={seatedPlayer}></HumanRow>
-                    }
-                })}
-            </Grid>
-        )
-    }
-
-    const gmLabel = (gm: GameMechanics): string => {
-        if (gm === 'basic') return 'Basic Mechanics'
-        else if (gm === 'scrapeoff') return 'Scrape-Off Mechanics'
-        else if (gm === 'bounce') return 'Bounce Mechanics'
-        else return 'Undefined'
-    }
-
-    const displayGameSettings = () => {
-        if (gameSettings === null)
-            return <label>No GameSettings found yet</label>
-        return (
-            <Select
-                value={gameSettings.mechanics}
-                onChange={(e) => {
-                    const s: string = e.target.value as string
-                    const gameMechs = toGameMechanics(s)
-                    if (gameMechs !== null)
-                        setGameSettings({ mechanics: gameMechs })
-                }}
-                style={{ display: 'block' }}
-            >
-                {gameMechs.map((gm, index) => {
-                    return (
-                        <MenuItem key={index} value={gm}>
-                            {gmLabel(gm)}
-                        </MenuItem>
-                    )
-                })}
-            </Select>
-        )
+        props.sendMessageToServer(message)
     }
 
     return (
         <Box>
             <label>Connected Players: tbi</label>
             <Box>
-                <MyButton onClick={onRandomMap}>
-                    {map !== null ? 'Change Map' : 'Select Map'}
-                </MyButton>
-                <ReadMap
-                    callback={(map) => {
-                        if (map !== null) selectMap(map)
-                    }}
-                ></ReadMap>
-                <MyButton disabled={map === null} onClick={startGame}>
-                    Start Game
-                </MyButton>
-                {displayGameSettings()}
-                {map !== null && (
-                    <Grid container spacing={2}>
-                        <Grid item>
-                            <MapPreview
-                                map={map}
-                                width={500}
-                                height={500}
-                            ></MapPreview>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <Box height={500}>{displayPlayers()}</Box>
-                        </Grid>
+                <Grid container spacing={2}>
+                    <Grid item xs={3}>
+                        <MyButton onClick={onRandomMap}>
+                            {map !== null ? 'Change Map' : 'Select Map'}
+                        </MyButton>
                     </Grid>
-                )}
+                    <Grid item xs={3}>
+                        <ReadMap
+                            callback={(map) => {
+                                if (map !== null) selectMap(map)
+                            }}
+                        ></ReadMap>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <MyButton disabled={map === null} onClick={startGame}>
+                            Start Game
+                        </MyButton>
+                    </Grid>
+                    <Grid item xs={3}>
+                        {gameSettings !== null && (
+                            <GameSettingsView
+                                gameSettings={gameSettings}
+                                setGameSettings={setGameSettings}
+                            ></GameSettingsView>
+                        )}
+                    </Grid>
+                    {map !== null && (
+                        <Grid item xs={12}>
+                            <Grid container spacing={2}>
+                                <Grid item>
+                                    <MapPreview
+                                        map={map}
+                                        width={500}
+                                        height={500}
+                                    ></MapPreview>
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <Box height={500}>
+                                        <DisplayPlayerView
+                                            playerIds={
+                                                map !== null
+                                                    ? Array.from(
+                                                          getPlayerIds(map),
+                                                      )
+                                                    : []
+                                            }
+                                            players={props.players}
+                                            takeSeat={takeSeat}
+                                            setAi={setAi}
+                                        ></DisplayPlayerView>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    )}
+                </Grid>
             </Box>
         </Box>
     )
