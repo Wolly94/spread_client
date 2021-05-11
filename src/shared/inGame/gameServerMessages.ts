@@ -1,6 +1,20 @@
 import { SpreadMap } from '../game/map'
 import { ClientGameState } from './clientGameState'
 
+export type GameMechanics = 'basic' | 'scrapeoff' | 'bounce'
+export const gameMechs: GameMechanics[] = ['basic', 'scrapeoff', 'bounce']
+
+export const toGameMechanics = (s: string): GameMechanics | null => {
+    if (s === 'basic') return s
+    else if (s === 'scrapeoff') return s
+    else if (s === 'bounce') return s
+    else return null
+}
+
+export interface GameSettings {
+    mechanics: GameMechanics
+}
+
 export interface SetPlayerIdMessage {
     type: 'playerid'
     data: {
@@ -29,6 +43,7 @@ export interface ClientLobbyState {
     players: ClientLobbyPlayer[]
     observers: ClientObserver[]
     map: SpreadMap | null
+    gameSettings: GameSettings
 }
 
 export interface LobbyStateMessage {

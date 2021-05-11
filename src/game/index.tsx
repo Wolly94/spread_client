@@ -10,6 +10,7 @@ import { ClientGameState } from '../shared/inGame/clientGameState'
 import GameClientMessageData from '../shared/inGame/gameClientMessages'
 import GameServerMessage, {
     ClientLobbyPlayer,
+    GameSettings,
     isServerLobbyMessage,
 } from '../shared/inGame/gameServerMessages'
 import SocketClient from '../socketClients/socketClient'
@@ -31,6 +32,7 @@ const Game = () => {
     const [playerId, setPlayerId] = useState<number | null>(null)
     const [, setRefresh] = React.useState(0)
     const [players, setPlayers] = useState<ClientLobbyPlayer[]>([])
+    const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
 
     const disconnectFromGame = useCallback(() => {
         gameProvider.clear()
@@ -57,6 +59,7 @@ const Game = () => {
                             console.log('lobby state set to ', message.data)
                             setPlayers(message.data.players)
                             setMap(message.data.map)
+                            setGameSettings(message.data.gameSettings)
                         } else if (message.type === 'playerid') {
                             console.log(
                                 'set playerid to ',
@@ -111,6 +114,7 @@ const Game = () => {
                         if (spreadGameClient.current !== null)
                             spreadGameClient.current.sendMessageToServer(msg)
                     }}
+                    gameSettings={gameSettings}
                 ></GameLobby>
             )
         } else {

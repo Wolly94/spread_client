@@ -1,5 +1,12 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core'
-import React from 'react'
+import {
+    Box,
+    Button,
+    Grid,
+    MenuItem,
+    Select,
+    Typography,
+} from '@material-ui/core'
+import React, { useState } from 'react'
 import MapPreview from '../components/mapPreview'
 import MyButton from '../components/MyButton'
 import ReadMap from '../components/ReadMap'
@@ -10,6 +17,7 @@ import {
     ClearSeatMessage,
     ClientLobbyMessage,
     SeatAiMessage,
+    SetGameSettingsMessage,
     SetMapMessage,
     StartGameMessage,
     TakeSeatMessage,
@@ -18,6 +26,10 @@ import {
     ClientAiPlayer,
     ClientHumanPlayer,
     ClientLobbyPlayer,
+    GameMechanics,
+    gameMechs,
+    GameSettings,
+    toGameMechanics,
 } from '../shared/inGame/gameServerMessages'
 
 interface LobbyCellProps {
@@ -120,10 +132,16 @@ interface GameLobbyProps {
     map: SpreadMap | null
     setMap: React.Dispatch<React.SetStateAction<SpreadMap | null>>
     players: ClientLobbyPlayer[]
+    gameSettings: GameSettings | null
     sendMessageToServer: (message: ClientLobbyMessage) => void
 }
 
-const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
+const GameLobby: React.FC<GameLobbyProps> = ({
+    map,
+    setMap,
+    gameSettings,
+    ...props
+}) => {
     const selectMap = (map: SpreadMap) => {
         const m: SetMapMessage = {
             type: 'setmap',
@@ -167,6 +185,12 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
         }
         props.sendMessageToServer(message)
     }
+    const setGameSettings = (gameSettings: GameSettings) => {
+        const message: SetGameSettingsMessage = {
+            type: 'gamesettings',
+            data: gameSettings,
+        }
+    }
 
     const displayPlayers = () => {
         if (map === null) return <Box></Box>
@@ -201,6 +225,39 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
             </Grid>
         )
     }
+
+    const gmLabel = (gm: GameMechanics): string => {
+        if (gm === 'basic') return 'Basic Mechanics'
+        else if (gm === 'scrapeoff') return 'Scrape-Off Mechanics'
+        else if (gm === 'bounce') return 'Bounce Mechanics'
+        else return 'Undefined'
+    }
+
+    const displayGameSettings = () => {
+        if (gameSettings === null)
+            return <label>No GameSettings found yet</label>
+        return (
+            <Select
+                value={gameSettings.mechanics}
+                onChange={(e) => {
+                    const s: string = e.target.value as string
+                    const gameMechs = toGameMechanics(s)
+                    if (gameMechs !== null)
+                        setGameSettings({ mechanics: gameMechs })
+                }}
+                style={{ display: 'block' }}
+            >
+                {gameMechs.map((gm, index) => {
+                    return (
+                        <MenuItem key={index} value={gm}>
+                            {gmLabel(gm)}
+                        </MenuItem>
+                    )
+                })}
+            </Select>
+        )
+    }
+
     return (
         <Box>
             <label>Connected Players: tbi</label>
@@ -216,6 +273,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({ map, setMap, ...props }) => {
                 <MyButton disabled={map === null} onClick={startGame}>
                     Start Game
                 </MyButton>
+                {displayGameSettings()}
                 {map !== null && (
                     <Grid container spacing={2}>
                         <Grid item>
