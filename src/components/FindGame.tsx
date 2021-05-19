@@ -1,6 +1,6 @@
 import { Box, Grid, makeStyles } from '@material-ui/core'
 import { useSnackbar } from 'notistack'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import FindGameClientMessageData from 'spread_game/dist/messages/findGame/findGameClientMessages'
 import FindGameServerMessage, {
     OpenGame,
@@ -63,19 +63,20 @@ const FindGame: React.FC<FindGameProps> = (props) => {
         }
     }, [submitting])
 
-    useEffect(() => {
-        const onMessageReceive = (message: FindGameServerMessage) => {
-            if (message.type === 'opengames') {
-                setOpenGames(message.data)
-            }
+    const onMessageReceive = useCallback((message: FindGameServerMessage) => {
+        if (message.type === 'opengames') {
+            setOpenGames(message.data)
         }
+    }, [])
+
+    useEffect(() => {
         getFindGameServer().then((urlResp) => {
             if (!isApiError(urlResp)) {
                 findGameClient.current = new SocketClient(
                     urlResp.url,
                     props.token,
+                    onMessageReceive,
                 )
-                findGameClient.current.setReceiver(onMessageReceive)
             } else {
                 enqueueSnackbar(urlResp.errorMessage, { variant: 'error' })
             }
@@ -84,7 +85,7 @@ const FindGame: React.FC<FindGameProps> = (props) => {
             findGameClient.current?.socket.close()
             findGameClient.current = null
         }
-    }, [props.token, enqueueSnackbar])
+    }, [props.token, enqueueSnackbar, onMessageReceive])
 
     return (
         <Box className={classes.root}>

@@ -14,7 +14,8 @@ import authProvider from '../auth/authProvider'
 import MyButton from '../components/MyButton'
 import gameProvider from '../gameProvider'
 import { PATHS } from '../Routes'
-import SocketClient from '../socketClients/socketClient'
+import { SocketClient } from '../socketClients/fakeSocketClient'
+import SocketClientImplementation from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'
 
@@ -43,40 +44,38 @@ const Game = () => {
         }
     }, [])
 
+    const onMessageReceive = useCallback((message: GameServerMessage) => {
+        //console.log('message received: ', message)
+        if (isServerLobbyMessage(message)) {
+            if (message.type === 'lobbystate') {
+                console.log('lobby state set to ', message.data)
+                setPlayers(message.data.players)
+                setMap(message.data.map)
+                setGameSettings(message.data.gameSettings)
+            } else if (message.type === 'playerid') {
+                console.log('set playerid to ', message.data.playerId)
+                setPlayerId(message.data.playerId)
+            }
+        } else {
+            if (message.type === 'gamestate') {
+                setClientGameData(message.data)
+            } else if (message.type === 'gameover') {
+                console.log('game is over!')
+            }
+        }
+    }, [])
+
     useEffect(() => {
         const token = authProvider.getToken()
         const gameSocketUrl = gameProvider.getSocketUrl()
         if (token === null || gameSocketUrl === null) history.push(PATHS.root)
         else if (spreadGameClient.current === null) {
             try {
-                spreadGameClient.current = new SocketClient(
+                spreadGameClient.current = new SocketClientImplementation(
                     gameSocketUrl,
                     token,
+                    onMessageReceive,
                 )
-                const onMessageReceive = (message: GameServerMessage) => {
-                    //console.log('message received: ', message)
-                    if (isServerLobbyMessage(message)) {
-                        if (message.type === 'lobbystate') {
-                            console.log('lobby state set to ', message.data)
-                            setPlayers(message.data.players)
-                            setMap(message.data.map)
-                            setGameSettings(message.data.gameSettings)
-                        } else if (message.type === 'playerid') {
-                            console.log(
-                                'set playerid to ',
-                                message.data.playerId,
-                            )
-                            setPlayerId(message.data.playerId)
-                        }
-                    } else {
-                        if (message.type === 'gamestate') {
-                            setClientGameData(message.data)
-                        } else if (message.type === 'gameover') {
-                            console.log('game is over!')
-                        }
-                    }
-                }
-                spreadGameClient.current.setReceiver(onMessageReceive)
             } catch {
                 gameProvider.clear()
                 console.log('invalid gameurl')
@@ -86,7 +85,7 @@ const Game = () => {
         return () => {
             disconnectFromGame()
         }
-    }, [history, disconnectFromGame])
+    }, [history, disconnectFromGame, onMessageReceive])
 
     const subView = () => {
         if (

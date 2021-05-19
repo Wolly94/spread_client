@@ -1,16 +1,22 @@
 import ClientMessage from 'spread_game/dist/messages/clientMessage'
+import { SocketClient } from './fakeSocketClient'
 
-class SocketClient<TReceiveMessage, TSenderMessageData> {
+class SocketClientImplementation<TReceiveMessage, TSenderMessageData>
+    implements SocketClient<TReceiveMessage, TSenderMessageData> {
     socket: WebSocket
     token: string
     url: string
-    onReceiveMessage: null | ((message: TReceiveMessage) => void)
+    onReceiveMessage: (message: TReceiveMessage) => void
 
-    constructor(toUrl: string, token: string) {
+    constructor(
+        toUrl: string,
+        token: string,
+        onReceiveMessage: (message: TReceiveMessage) => void,
+    ) {
         this.socket = new WebSocket(toUrl + '?token=' + token)
         this.token = token
         this.url = toUrl
-        this.onReceiveMessage = null
+        this.onReceiveMessage = onReceiveMessage
 
         this.socket.onopen = () => {
             this.onConnect()
@@ -26,10 +32,6 @@ class SocketClient<TReceiveMessage, TSenderMessageData> {
 
     close() {
         this.socket.close()
-    }
-
-    setReceiver(rec: (message: TReceiveMessage) => void) {
-        this.onReceiveMessage = rec
     }
 
     waitForSocketConnection(callback: () => void) {
@@ -62,4 +64,4 @@ class SocketClient<TReceiveMessage, TSenderMessageData> {
     }
 }
 
-export default SocketClient
+export default SocketClientImplementation

@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core'
+import { Box, Grid } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -75,18 +75,31 @@ const App: React.FC<AppProps> = (props) => {
 
     return (
         <Box className={classes.centered}>
-            <MyButton
-                onClick={() => {
-                    authProvider.clear()
-                    setToken(null)
-                }}
-            >
-                Reset Token
-            </MyButton>
-            <MyButton onClick={() => history.push(PATHS.editor)}>
-                Create your own Map
-            </MyButton>
-            {subView()}
+            <Grid container spacing={4}>
+                <Grid container direction={'row'} spacing={4}>
+                    <Grid item xs={4}>
+                        <MyButton onClick={() => history.push(PATHS.playAi)}>
+                            Play against AI
+                        </MyButton>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <MyButton
+                            onClick={() => {
+                                authProvider.clear()
+                                setToken(null)
+                            }}
+                        >
+                            Reset Token
+                        </MyButton>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <MyButton onClick={() => history.push(PATHS.editor)}>
+                            Create your own Map
+                        </MyButton>
+                    </Grid>
+                </Grid>
+                <Grid item>{subView()}</Grid>
+            </Grid>
         </Box>
     )
 }

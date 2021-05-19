@@ -10725,7 +10725,7 @@
     "extend-shallow" "^3.0.0"
 
 "spread_game@github:Wolly94/spread_game":
-  "resolved" "git+ssh://git@github.com/Wolly94/spread_game.git#ce9b726cc22a8f21e7cc216115c6787d33e4898f"
+  "resolved" "git+ssh://git@github.com/Wolly94/spread_game.git#aa90ce2977f76091121b9502ed26f8c09988fd34"
   "version" "1.0.0"
   dependencies:
     "jest" "^26.6.3"
