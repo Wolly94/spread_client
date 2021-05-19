@@ -1,11 +1,11 @@
 import { MenuItem, Select } from '@material-ui/core'
 import React from 'react'
 import {
-    GameMechanics,
-    gameMechs,
     GameSettings,
+    GameMechanics,
     toGameMechanics,
-} from '../shared/inGame/gameServerMessages'
+    gameMechs,
+} from 'spread_game/dist/messages/inGame/gameServerMessages'
 
 interface GameSettingsProps {
     gameSettings: GameSettings

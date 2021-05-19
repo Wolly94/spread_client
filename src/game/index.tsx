@@ -1,18 +1,19 @@
 import { Box } from '@material-ui/core'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
+import { GameClientMessageData } from 'spread_game/dist/messages/inGame/gameClientMessages'
+import {
+    GameServerMessage,
+    ClientLobbyPlayer,
+    GameSettings,
+    isServerLobbyMessage,
+} from 'spread_game/dist/messages/inGame/gameServerMessages'
+import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
 import authProvider from '../auth/authProvider'
 import MyButton from '../components/MyButton'
 import gameProvider from '../gameProvider'
 import { PATHS } from '../Routes'
-import { SpreadMap } from '../shared/game/map'
-import { ClientGameState } from '../shared/inGame/clientGameState'
-import GameClientMessageData from '../shared/inGame/gameClientMessages'
-import GameServerMessage, {
-    ClientLobbyPlayer,
-    GameSettings,
-    isServerLobbyMessage,
-} from '../shared/inGame/gameServerMessages'
 import SocketClient from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'

@@ -1,12 +1,12 @@
 import { Box, Grid, makeStyles } from '@material-ui/core'
 import { useSnackbar } from 'notistack'
 import React, { useEffect, useRef, useState } from 'react'
-import { isApiError } from '../api/base'
-import { createGameRequest, getFindGameServer } from '../api/gameApi'
-import FindGameClientMessageData from '../shared/findGame/findGameClientMessages'
+import FindGameClientMessageData from 'spread_game/dist/messages/findGame/findGameClientMessages'
 import FindGameServerMessage, {
     OpenGame,
-} from '../shared/findGame/findGameServerMessages'
+} from 'spread_game/dist/messages/findGame/findGameServerMessages'
+import { isApiError } from '../api/base'
+import { createGameRequest, getFindGameServer } from '../api/gameApi'
 import SocketClient from '../socketClients/socketClient'
 import MyButton from './MyButton'
 import { OpenGamesFC } from './OpenGame'

@@ -1,6 +1,6 @@
 import React from 'react'
+import { SpreadMap, validateMap } from 'spread_game/dist/spreadGame/map/map'
 import { ReadFile } from '../fileService'
-import { SpreadMap, validateMap } from '../shared/game/map'
 
 interface ReadMapProps {
     callback: (map: SpreadMap | null) => void

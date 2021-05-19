@@ -1,12 +1,16 @@
 import { Box, Grid, makeStyles } from '@material-ui/core'
 import React, { useState } from 'react'
 import { useHistory } from 'react-router'
+import {
+    emptyMap,
+    SpreadMap,
+    validateMap,
+} from 'spread_game/dist/spreadGame/map/map'
+import { generate2PlayerMap } from 'spread_game/dist/spreadGame/map/mapGenerator'
 import MyButton from '../components/MyButton'
 import ReadMap from '../components/ReadMap'
 import { ReadFile, saveFile } from '../fileService'
 import { PATHS } from '../Routes'
-import { emptyMap, SpreadMap, validateMap } from '../shared/game/map'
-import { generate2PlayerMap } from '../shared/game/mapGenerator'
 import EditorCanvas from './editorCanvas'
 
 const useStyles = makeStyles({

@@ -1,11 +1,11 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React from 'react'
-import { playerColors } from '../drawing/draw'
 import {
-    ClientAiPlayer,
     ClientHumanPlayer,
+    ClientAiPlayer,
     ClientLobbyPlayer,
-} from '../shared/inGame/gameServerMessages'
+} from 'spread_game/dist/messages/inGame/gameServerMessages'
+import { playerColors } from '../drawing/draw'
 
 interface LobbyCellProps {
     label: string

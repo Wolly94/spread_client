@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core'
 import clsx from 'clsx'
 import React, { useState } from 'react'
-import { OpenGame } from '../shared/findGame/findGameServerMessages'
+import { OpenGame } from 'spread_game/dist/messages/findGame/findGameServerMessages'
 
 const useStyles = makeStyles((theme) => ({
     tableRow: {

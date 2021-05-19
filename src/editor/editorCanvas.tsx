@@ -1,14 +1,14 @@
 import { Box } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { drawEntity } from '../drawing/draw'
-import { entityContainsPoint } from '../shared/game/entites'
+import { entityContainsPoint } from 'spread_game/dist/spreadGame/entites'
 import {
-    addCellToMap,
-    MapCell,
-    removeCellFromMap,
     SpreadMap,
+    MapCell,
+    addCellToMap,
     updateCellInMap,
-} from '../shared/game/map'
+    removeCellFromMap,
+} from 'spread_game/dist/spreadGame/map/map'
+import { drawEntity } from '../drawing/draw'
 import EditorForm from './editorForm'
 
 interface MouseDownProps {

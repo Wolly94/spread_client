@@ -1,4 +1,4 @@
-import ClientMessage from '../shared/clientMessage'
+import ClientMessage from 'spread_game/dist/messages/clientMessage'
 
 class SocketClient<TReceiveMessage, TSenderMessageData> {
     socket: WebSocket

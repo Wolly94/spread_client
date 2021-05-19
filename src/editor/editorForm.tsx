@@ -1,16 +1,16 @@
 import { Box, MenuItem, Select, TextField, Typography } from '@material-ui/core'
 import { useFormik } from 'formik'
 import React from 'react'
+import { radiusToUnits } from 'spread_game/dist/spreadGame/common'
+import {
+    MapCell,
+    SpreadMap,
+    availableSpace,
+    updateCellInMap,
+    mapDefaults,
+} from 'spread_game/dist/spreadGame/map/map'
 import * as yup from 'yup'
 import MyButton from '../components/MyButton'
-import { radiusToUnits } from '../shared/game/common'
-import {
-    availableSpace,
-    MapCell,
-    mapDefaults,
-    SpreadMap,
-    updateCellInMap,
-} from '../shared/game/map'
 
 const neutralPlayerId = -1
 

@@ -1,5 +1,8 @@
-import { MapCell } from '../shared/game/map'
-import { ClientBubble, ClientCell } from '../shared/inGame/clientGameState'
+import {
+    ClientCell,
+    ClientBubble,
+} from 'spread_game/dist/messages/inGame/clientGameState'
+import { MapCell } from 'spread_game/dist/spreadGame/map/map'
 
 export const neutralColor = 'grey'
 export const selectedColor = 'black'

@@ -1,18 +1,5 @@
-import {
-    Box,
-    Button,
-    Grid,
-    MenuItem,
-    Select,
-    Typography,
-} from '@material-ui/core'
-import React, { useState } from 'react'
-import MapPreview from '../components/mapPreview'
-import MyButton from '../components/MyButton'
-import ReadMap from '../components/ReadMap'
-import { playerColors } from '../drawing/draw'
-import { getPlayerIds, SpreadMap } from '../shared/game/map'
-import { generate2PlayerMap } from '../shared/game/mapGenerator'
+import { Box, Grid } from '@material-ui/core'
+import React from 'react'
 import {
     ClearSeatMessage,
     ClientLobbyMessage,
@@ -21,16 +8,16 @@ import {
     SetMapMessage,
     StartGameMessage,
     TakeSeatMessage,
-} from '../shared/inGame/clientLobbyMessage'
+} from 'spread_game/dist/messages/inGame/clientLobbyMessage'
 import {
-    ClientAiPlayer,
-    ClientHumanPlayer,
     ClientLobbyPlayer,
-    GameMechanics,
-    gameMechs,
     GameSettings,
-    toGameMechanics,
-} from '../shared/inGame/gameServerMessages'
+} from 'spread_game/dist/messages/inGame/gameServerMessages'
+import { getPlayerIds, SpreadMap } from 'spread_game/dist/spreadGame/map/map'
+import { generate2PlayerMap } from 'spread_game/dist/spreadGame/map/mapGenerator'
+import MapPreview from '../components/mapPreview'
+import MyButton from '../components/MyButton'
+import ReadMap from '../components/ReadMap'
 import GameSettingsView from './GameSettingsView'
 import DisplayPlayerView from './PlayerView'
 

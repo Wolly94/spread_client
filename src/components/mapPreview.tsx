@@ -1,7 +1,7 @@
 import { Box } from '@material-ui/core'
 import React, { useEffect, useRef } from 'react'
+import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
 import { drawEntityScaled } from '../drawing/draw'
-import { SpreadMap } from '../shared/game/map'
 
 interface MapPreviewProps {
     map: SpreadMap

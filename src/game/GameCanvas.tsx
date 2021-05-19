@@ -1,13 +1,16 @@
 import { Box } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { drawEntityScaled } from '../drawing/draw'
-import { entityContainsPoint } from '../shared/game/entites'
-import { SpreadMap } from '../shared/game/map'
-import { ClientCell, ClientGameState } from '../shared/inGame/clientGameState'
+import {
+    ClientGameState,
+    ClientCell,
+} from 'spread_game/dist/messages/inGame/clientGameState'
 import {
     ClientInGameMessage,
     SendUnits,
-} from '../shared/inGame/clientInGameMessage'
+} from 'spread_game/dist/messages/inGame/clientInGameMessage'
+import { entityContainsPoint } from 'spread_game/dist/spreadGame/entites'
+import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
+import { drawEntityScaled } from '../drawing/draw'
 
 interface GameCanvasProps {
     map: SpreadMap

@@ -1,4 +1,4 @@
-import UrlResponse from '../shared/general/urlResponse'
+import UrlResponse from 'spread_game/dist/messages/general/urlResponse'
 import { apiRequest, HttpVerb } from './base'
 import API_PATH from './urls'
 
