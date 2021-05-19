@@ -1,12 +1,14 @@
 import { Box } from '@material-ui/core'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
+import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
+import ClientMessage from 'spread_game/dist/messages/clientMessage'
 import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
 import { GameClientMessageData } from 'spread_game/dist/messages/inGame/gameClientMessages'
 import {
-    GameServerMessage,
     ClientLobbyPlayer,
     GameSettings,
+    GameServerMessage,
     isServerLobbyMessage,
 } from 'spread_game/dist/messages/inGame/gameServerMessages'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
@@ -14,19 +16,21 @@ import authProvider from '../auth/authProvider'
 import MyButton from '../components/MyButton'
 import gameProvider from '../gameProvider'
 import { PATHS } from '../Routes'
-import SocketClientImplementation, {
-    SocketClient,
-} from '../socketClients/socketClient'
+import SocketClientImplementation from '../socketClients/socketClient'
 import GameCanvas from './GameCanvas'
 import GameLobby from './GameLobby'
 
-// handles socket communication with gameserver
-const GameOldTBR = () => {
+interface GameProps {
+    token: string
+    connectToServer: (
+        token: string,
+        sendToClient: (msg: GameServerMessage) => void,
+    ) => void
+    sendToServer: (msg: ClientMessage<GameClientMessageData>) => void
+}
+
+const Game: React.FC<GameProps> = (props) => {
     const history = useHistory()
-    const spreadGameClient = useRef<SocketClient<
-        GameServerMessage,
-        GameClientMessageData
-    > | null>(null)
     const [
         clientGameState,
         setClientGameData,
@@ -38,11 +42,9 @@ const GameOldTBR = () => {
     const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
 
     const disconnectFromGame = useCallback(() => {
+        // TODO add functionality to comm
+        // props.comm.close()
         gameProvider.clear()
-        if (spreadGameClient.current !== null) {
-            spreadGameClient.current.close()
-            spreadGameClient.current = null
-        }
     }, [])
 
     const onMessageReceive = useCallback((message: GameServerMessage) => {
@@ -66,65 +68,38 @@ const GameOldTBR = () => {
         }
     }, [])
 
-    useEffect(() => {
-        const token = authProvider.getToken()
-        const gameSocketUrl = gameProvider.getSocketUrl()
-        if (token === null || gameSocketUrl === null) history.push(PATHS.root)
-        else if (spreadGameClient.current === null) {
-            try {
-                spreadGameClient.current = new SocketClientImplementation(
-                    gameSocketUrl,
-                    token,
-                    onMessageReceive,
-                )
-            } catch {
-                gameProvider.clear()
-                console.log('invalid gameurl')
-            }
-            setRefresh((r) => r + 1)
-        }
-        return () => {
-            disconnectFromGame()
-        }
-    }, [history, disconnectFromGame, onMessageReceive])
+    const clientComm = useMemo(() => {
+        const x = new ClientCommunication<
+            GameServerMessage,
+            GameClientMessageData
+        >(props.token, onMessageReceive, props.sendToServer)
+        props.connectToServer(props.token, onMessageReceive)
+        return x
+    }, [onMessageReceive])
 
     const subView = () => {
-        if (
-            clientGameState !== null &&
-            map !== null &&
-            spreadGameClient.current !== null
-        ) {
+        if (clientGameState !== null && map !== null) {
             return (
                 <GameCanvas
                     playerId={playerId}
                     map={map}
                     clientGameState={clientGameState}
                     sendMessageToServer={(msg) => {
-                        if (spreadGameClient.current !== null)
-                            spreadGameClient.current.sendMessageToServer(msg)
+                        clientComm.sendMessageToServer(msg)
                     }}
                 ></GameCanvas>
             )
-        } else if (spreadGameClient.current !== null) {
+        } else {
             return (
                 <GameLobby
                     map={map}
                     players={players}
                     setMap={setMap}
                     sendMessageToServer={(msg) => {
-                        if (spreadGameClient.current !== null)
-                            spreadGameClient.current.sendMessageToServer(msg)
+                        clientComm.sendMessageToServer(msg)
                     }}
                     gameSettings={gameSettings}
                 ></GameLobby>
-            )
-        } else {
-            return (
-                <label>
-                    {' '}
-                    loading ... token: {authProvider.getToken()} and url:{' '}
-                    {gameProvider.getSocketUrl()}
-                </label>
             )
         }
     }
@@ -143,4 +118,4 @@ const GameOldTBR = () => {
     )
 }
 
-export default GameOldTBR
+export default Game

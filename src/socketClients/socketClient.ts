@@ -1,5 +1,10 @@
 import ClientMessage from 'spread_game/dist/messages/clientMessage'
-import { SocketClient } from './fakeSocketClient'
+
+export interface SocketClient<TReceiveMessage, TSenderMessageData> {
+    close: () => void
+    onReceiveMessage: (message: TReceiveMessage) => void
+    sendMessageToServer: (message: TSenderMessageData) => void
+}
 
 class SocketClientImplementation<TReceiveMessage, TSenderMessageData>
     implements SocketClient<TReceiveMessage, TSenderMessageData> {
