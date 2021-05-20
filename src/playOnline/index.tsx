@@ -1,7 +1,7 @@
 import { Grid } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
+import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
 import { GameClientMessageData } from 'spread_game/dist/messages/inGame/gameClientMessages'
 import { GameServerMessage } from 'spread_game/dist/messages/inGame/gameServerMessages'
 import authProvider from '../auth/authProvider'
@@ -20,15 +20,51 @@ const PlayHuman = () => {
         GameClientMessageData
     > | null>(null)
     const [, setRefresh] = React.useState(0)
-    const [
-        clientGameState,
-        setClientGameData,
-    ] = useState<ClientGameState | null>(null)
 
     const token = useMemo(() => {
         const t = authProvider.getToken()
         return t
     }, [])
+
+    const comm = useMemo(() => {
+        if (token === null) {
+            history.push(PATHS.root)
+        }
+        const x = new ClientCommunication<
+            GameServerMessage,
+            GameClientMessageData
+        >(token === null ? '' : token)
+        return x
+    }, [token])
+
+    const connectToServer = useCallback(() => {
+        const gameSocketUrl = gameProvider.getSocketUrl()
+        if (token === null || gameSocketUrl === null) history.push(PATHS.root)
+        else if (
+            spreadGameClient.current === null &&
+            comm.onReceiveMessage !== null
+        ) {
+            try {
+                spreadGameClient.current = new SocketClientImplementation(
+                    gameSocketUrl,
+                    token,
+                    (msg) => {
+                        if (comm.onReceiveMessage !== null)
+                            comm.onReceiveMessage(msg)
+                    },
+                )
+                comm.connect((msg) => {
+                    if (spreadGameClient.current !== null)
+                        spreadGameClient.current.sendMessageToServer(msg.data)
+                    else console.log('game client cant send to server')
+                })
+            } catch {
+                gameProvider.clear()
+                console.log('invalid gameurl')
+            }
+            setRefresh((r) => r + 1)
+        }
+    }, [comm])
 
     const disconnectFromGame = useCallback(() => {
         gameProvider.clear()
@@ -37,38 +73,6 @@ const PlayHuman = () => {
             spreadGameClient.current = null
         }
     }, [])
-
-    const [onMessageReceive, setOnMessageReceive] = useState<
-        ((message: GameServerMessage) => void) | null
-    >(null)
-
-    useEffect(() => {
-        if (onMessageReceive !== null) {
-            const gameSocketUrl = gameProvider.getSocketUrl()
-            if (token === null || gameSocketUrl === null)
-                history.push(PATHS.root)
-            else if (spreadGameClient.current === null) {
-                try {
-                    spreadGameClient.current = new SocketClientImplementation(
-                        gameSocketUrl,
-                        token,
-                        (msg) => {
-                            if (onMessageReceive !== null) onMessageReceive(msg)
-                        },
-                    )
-                } catch {
-                    gameProvider.clear()
-                    console.log('invalid gameurl')
-                }
-                setRefresh((r) => r + 1)
-            } else {
-                spreadGameClient.current.onReceiveMessage = onMessageReceive
-            }
-        }
-        return () => {
-            disconnectFromGame()
-        }
-    }, [onMessageReceive, disconnectFromGame, history])
 
     if (token === null) {
         return <label> no token found </label>
@@ -80,15 +84,9 @@ const PlayHuman = () => {
                 <Grid item>
                     <Game
                         token={token}
-                        sendToServer={(msg) =>
-                            spreadGameClient.current?.sendMessageToServer(
-                                msg.data,
-                            )
-                        }
-                        setReceiveMessage={...}
-                        connectToServer={(token, sendToClient) =>
-                            gameHandler.connectClient(token, sendToClient)
-                        }
+                        comm={comm}
+                        connectToServer={connectToServer}
+                        disconnectFromGame={disconnectFromGame}
                     ></Game>
                 </Grid>
             </Grid>

@@ -22,11 +22,9 @@ import GameLobby from './GameLobby'
 
 interface GameProps {
     token: string
-    connectToServer: (
-        token: string,
-        sendToClient: (msg: GameServerMessage) => void,
-    ) => void
-    sendToServer: (msg: ClientMessage<GameClientMessageData>) => void
+    comm: ClientCommunication<GameServerMessage, GameClientMessageData>
+    connectToServer: () => void
+    disconnectFromGame: () => void
 }
 
 const Game: React.FC<GameProps> = (props) => {
@@ -40,12 +38,6 @@ const Game: React.FC<GameProps> = (props) => {
     const [, setRefresh] = React.useState(0)
     const [players, setPlayers] = useState<ClientLobbyPlayer[]>([])
     const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
-
-    const disconnectFromGame = useCallback(() => {
-        // TODO add functionality to comm
-        // props.comm.close()
-        gameProvider.clear()
-    }, [])
 
     const onMessageReceive = useCallback((message: GameServerMessage) => {
         //console.log('message received: ', message)
@@ -68,14 +60,10 @@ const Game: React.FC<GameProps> = (props) => {
         }
     }, [])
 
-    const clientComm = useMemo(() => {
-        const x = new ClientCommunication<
-            GameServerMessage,
-            GameClientMessageData
-        >(props.token, onMessageReceive, props.sendToServer)
-        props.connectToServer(props.token, onMessageReceive)
-        return x
-    }, [onMessageReceive])
+    useEffect(() => {
+        props.comm.setReceiver(onMessageReceive)
+        props.connectToServer()
+    }, [props.comm, props.connectToServer, onMessageReceive])
 
     const subView = () => {
         if (clientGameState !== null && map !== null) {
@@ -85,7 +73,9 @@ const Game: React.FC<GameProps> = (props) => {
                     map={map}
                     clientGameState={clientGameState}
                     sendMessageToServer={(msg) => {
-                        clientComm.sendMessageToServer(msg)
+                        if (props.comm.sendMessageToServer !== null)
+                            props.comm.sendMessageToServer(msg)
+                        else console.log('client cant send to server')
                     }}
                 ></GameCanvas>
             )
@@ -96,7 +86,9 @@ const Game: React.FC<GameProps> = (props) => {
                     players={players}
                     setMap={setMap}
                     sendMessageToServer={(msg) => {
-                        clientComm.sendMessageToServer(msg)
+                        if (props.comm.sendMessageToServer !== null)
+                            props.comm.sendMessageToServer(msg)
+                        else console.log('client cant send to server')
                     }}
                     gameSettings={gameSettings}
                 ></GameLobby>
@@ -107,7 +99,7 @@ const Game: React.FC<GameProps> = (props) => {
         <Box>
             <MyButton
                 onClick={() => {
-                    disconnectFromGame()
+                    props.disconnectFromGame()
                     history.push(PATHS.root)
                 }}
             >
