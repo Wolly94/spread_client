@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core'
+import { Box, Grid } from '@material-ui/core'
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
@@ -11,9 +11,14 @@ import {
     GameServerMessage,
     isServerLobbyMessage,
 } from 'spread_game/dist/messages/inGame/gameServerMessages'
+import {
+    ClientReplayMessage,
+    GetReplayMessage,
+} from 'spread_game/dist/messages/replay/clientReplayMessages'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
 import authProvider from '../auth/authProvider'
 import MyButton from '../components/MyButton'
+import { saveFile } from '../fileService'
 import gameProvider from '../gameProvider'
 import { PATHS } from '../Routes'
 import SocketClientImplementation from '../socketClients/socketClient'
@@ -56,9 +61,22 @@ const Game: React.FC<GameProps> = (props) => {
                 setClientGameData(message.data)
             } else if (message.type === 'gameover') {
                 console.log('game is over!')
+            } else if (message.type === 'sendreplay') {
+                const replay = message.data
+                const fileData = JSON.stringify(replay)
+                saveFile({ fileName: 'replay.spread.rep', data: fileData })
             }
         }
     }, [])
+
+    const requestReplay = useCallback(() => {
+        const mess: GetReplayMessage = {
+            type: 'getreplay',
+            data: {},
+        }
+        if (props.comm.sendMessageToServer !== null)
+            props.comm.sendMessageToServer(mess)
+    }, [props])
 
     useEffect(() => {
         props.comm.setReceiver(onMessageReceive)
@@ -68,16 +86,25 @@ const Game: React.FC<GameProps> = (props) => {
     const subView = () => {
         if (clientGameState !== null && map !== null) {
             return (
-                <GameCanvas
-                    playerId={playerId}
-                    map={map}
-                    clientGameState={clientGameState}
-                    sendMessageToServer={(msg) => {
-                        if (props.comm.sendMessageToServer !== null)
-                            props.comm.sendMessageToServer(msg)
-                        else console.log('client cant send to server')
-                    }}
-                ></GameCanvas>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <GameCanvas
+                            playerId={playerId}
+                            map={map}
+                            clientGameState={clientGameState}
+                            sendMessageToServer={(msg) => {
+                                if (props.comm.sendMessageToServer !== null)
+                                    props.comm.sendMessageToServer(msg)
+                                else console.log('client cant send to server')
+                            }}
+                        ></GameCanvas>
+                    </Grid>
+                    <Grid item>
+                        <MyButton onClick={() => requestReplay()}>
+                            Download Replay
+                        </MyButton>
+                    </Grid>
+                </Grid>
             )
         } else {
             return (

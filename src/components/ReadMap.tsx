@@ -15,10 +15,9 @@ const ReadMap: React.FC<ReadMapProps> = (props) => {
     }
 
     return (
-        <ReadFile
-            allowedFileEndings={['.spread']}
-            handleInput={handleRead}
-        ></ReadFile>
+        <ReadFile allowedFileEndings={['.spread']} handleInput={handleRead}>
+            Load Map
+        </ReadFile>
     )
 }
 

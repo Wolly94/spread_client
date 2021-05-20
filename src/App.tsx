@@ -97,6 +97,11 @@ const App: React.FC<AppProps> = (props) => {
                             Create your own Map
                         </MyButton>
                     </Grid>
+                    <Grid item xs={4}>
+                        <MyButton onClick={() => history.push(PATHS.replay)}>
+                            Watch Replay
+                        </MyButton>
+                    </Grid>
                 </Grid>
                 <Grid item>{subView()}</Grid>
             </Grid>
