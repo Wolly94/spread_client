@@ -1,6 +1,7 @@
 import { Grid } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
+import { PlayerData } from 'spread_game/dist/communication/gameServerHandler/common'
 import { GameServerHandler } from 'spread_game/dist/communication/gameServerHandler/GameServerHandler'
 import { GameClientMessageData } from 'spread_game/dist/messages/inGame/gameClientMessages'
 import { GameServerMessage } from 'spread_game/dist/messages/inGame/gameServerMessages'
@@ -19,7 +20,10 @@ const PlayAi = () => {
 
     const connectToServer = useCallback(() => {
         if (comm.onReceiveMessage !== null) {
-            gameHandler.connectClient(token, comm.onReceiveMessage)
+            const playerData: PlayerData = {
+                name: 'FakeServerPlayerName1000',
+            }
+            gameHandler.connectClient(token, playerData, comm.onReceiveMessage)
             comm.connect((msg) =>
                 gameHandler.onMessageReceive(msg.data, msg.token),
             )

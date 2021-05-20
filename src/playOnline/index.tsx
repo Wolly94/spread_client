@@ -74,6 +74,10 @@ const PlayHuman = () => {
         }
     }, [])
 
+    useEffect(() => {
+        return () => disconnectFromGame()
+    }, [disconnectFromGame])
+
     if (token === null) {
         return <label> no token found </label>
     } else if (spreadGameClient.current === null) {
