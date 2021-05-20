@@ -1,5 +1,5 @@
 import { Grid } from '@material-ui/core'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
 import { GameClientMessageData } from 'spread_game/dist/messages/inGame/gameClientMessages'
@@ -35,7 +35,7 @@ const PlayHuman = () => {
             GameClientMessageData
         >(token === null ? '' : token)
         return x
-    }, [token])
+    }, [token, history])
 
     const connectToServer = useCallback(() => {
         const gameSocketUrl = gameProvider.getSocketUrl()
@@ -64,7 +64,7 @@ const PlayHuman = () => {
             }
             setRefresh((r) => r + 1)
         }
-    }, [comm])
+    }, [comm, history, token])
 
     const disconnectFromGame = useCallback(() => {
         gameProvider.clear()
@@ -80,8 +80,6 @@ const PlayHuman = () => {
 
     if (token === null) {
         return <label> no token found </label>
-    } else if (spreadGameClient.current === null) {
-        return <label> no game client found </label>
     } else {
         return (
             <Grid container>

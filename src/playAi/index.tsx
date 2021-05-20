@@ -1,5 +1,5 @@
 import { Grid } from '@material-ui/core'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { ClientCommunication } from 'spread_game/dist/communication/ClientCommunication'
 import { PlayerData } from 'spread_game/dist/communication/gameServerHandler/common'
 import { GameServerHandler } from 'spread_game/dist/communication/gameServerHandler/GameServerHandler'
@@ -28,7 +28,7 @@ const PlayAi = () => {
                 gameHandler.onMessageReceive(msg.data, msg.token),
             )
         }
-    }, [token, comm])
+    }, [token, comm, gameHandler])
 
     return (
         <Grid container>

@@ -63,7 +63,7 @@ const Game: React.FC<GameProps> = (props) => {
     useEffect(() => {
         props.comm.setReceiver(onMessageReceive)
         props.connectToServer()
-    }, [props.comm, props.connectToServer, onMessageReceive])
+    }, [onMessageReceive, props])
 
     const subView = () => {
         if (clientGameState !== null && map !== null) {

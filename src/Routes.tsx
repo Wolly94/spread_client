@@ -2,7 +2,6 @@ import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 import App from './App'
 import Editor from './editor/editor'
-import GameOldTBR from './game'
 import PlayAi from './playAi'
 import PlayHuman from './playOnline'
 
