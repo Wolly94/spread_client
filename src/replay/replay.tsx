@@ -29,7 +29,7 @@ const Replay: React.FC<ReplayProps> = (props) => {
             clearInterval(runningId)
             setRunningId(null)
         }
-    }, [])
+    }, [runningId])
 
     const start = useCallback(() => {
         setRunningId(
@@ -52,7 +52,7 @@ const Replay: React.FC<ReplayProps> = (props) => {
     useEffect(() => {
         start()
         return () => stop()
-    }, [])
+    }, [start, stop])
 
     return (
         <ClientGameStateView
