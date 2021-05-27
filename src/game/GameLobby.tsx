@@ -1,11 +1,12 @@
 import { Box, Grid } from '@material-ui/core'
-import React from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
     ClearSeatMessage,
     ClientLobbyMessage,
     SeatAiMessage,
     SetGameSettingsMessage,
     SetMapMessage,
+    SetSkilledPerksMessage,
     StartGameMessage,
     TakeSeatMessage,
 } from 'spread_game/dist/messages/inGame/clientLobbyMessage'
@@ -13,6 +14,11 @@ import {
     ClientLobbyPlayer,
     GameSettings,
 } from 'spread_game/dist/messages/inGame/gameServerMessages'
+import {
+    SkilledPerk,
+    SkillTree,
+    skillTreeMethods,
+} from 'spread_game/dist/skilltree/skilltree'
 import { getPlayerIds, SpreadMap } from 'spread_game/dist/spreadGame/map/map'
 import { generate2PlayerMap } from 'spread_game/dist/spreadGame/map/mapGenerator'
 import MapPreview from '../components/mapPreview'
@@ -20,10 +26,14 @@ import MyButton from '../components/MyButton'
 import ReadMap from '../components/ReadMap'
 import GameSettingsView from './GameSettingsView'
 import DisplayPlayerView from './PlayerView'
+import SkillTreeView from './SkillTreeView'
 
 interface GameLobbyProps {
     map: SpreadMap | null
+    skillTree: SkillTree | null
     setMap: React.Dispatch<React.SetStateAction<SpreadMap | null>>
+    playerId: number | null
+    playerName: string | null
     players: ClientLobbyPlayer[]
     gameSettings: GameSettings | null
     sendMessageToServer: (message: ClientLobbyMessage) => void
@@ -35,6 +45,33 @@ const GameLobby: React.FC<GameLobbyProps> = ({
     gameSettings,
     ...props
 }) => {
+    const [
+        selectedPlayer,
+        setSelectedPlayer,
+    ] = useState<ClientLobbyPlayer | null>(null)
+
+    useEffect(() => {
+        if (selectedPlayer !== null) {
+            if (selectedPlayer.type === 'ai') {
+                if (
+                    !props.players.some(
+                        (pl) =>
+                            pl.type === 'ai' &&
+                            pl.playerId === selectedPlayer.playerId,
+                    )
+                )
+                    setSelectedPlayer(null)
+            } else if (
+                !props.players.some(
+                    (pl) =>
+                        pl.type === 'human' && selectedPlayer.name === pl.name,
+                )
+            ) {
+                setSelectedPlayer(null)
+            }
+        }
+    }, [props.players, selectedPlayer])
+
     const selectMap = (map: SpreadMap) => {
         const m: SetMapMessage = {
             type: 'setmap',
@@ -85,10 +122,25 @@ const GameLobby: React.FC<GameLobbyProps> = ({
         }
         props.sendMessageToServer(message)
     }
+    const setSkilledPerks = useCallback(
+        (skills: SkilledPerk[]) => {
+            if (
+                selectedPlayer !== null &&
+                selectedPlayer.type === 'human' &&
+                selectedPlayer.name === props.playerName
+            ) {
+                const message: SetSkilledPerksMessage = {
+                    type: 'setskilledperks',
+                    data: skillTreeMethods.toSkilledPerkData(skills),
+                }
+                props.sendMessageToServer(message)
+            }
+        },
+        [selectedPlayer],
+    )
 
     return (
         <Box>
-            <label>Connected Players: tbi</label>
             <Box>
                 <Grid container spacing={2}>
                     <Grid item xs={3}>
@@ -126,7 +178,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
                                         height={500}
                                     ></MapPreview>
                                 </Grid>
-                                <Grid item xs={3}>
+                                <Grid item xs={8}>
                                     <Box height={500}>
                                         <DisplayPlayerView
                                             playerIds={
@@ -136,16 +188,49 @@ const GameLobby: React.FC<GameLobbyProps> = ({
                                                       )
                                                     : []
                                             }
+                                            playerName={props.playerName}
                                             players={props.players}
                                             takeSeat={takeSeat}
                                             setAi={setAi}
                                             clear={clear}
+                                            setSelectedPlayer={(player) =>
+                                                setSelectedPlayer(player)
+                                            }
                                         ></DisplayPlayerView>
                                     </Box>
                                 </Grid>
                             </Grid>
                         </Grid>
                     )}
+                    <Grid item xs={12}>
+                        {props.skillTree !== null &&
+                            selectedPlayer !== null && (
+                                <SkillTreeView
+                                    skillTree={props.skillTree}
+                                    skilledPerks={skillTreeMethods.toSkilledPerks(
+                                        selectedPlayer.skilledPerks,
+                                    )}
+                                    readonly={
+                                        !(
+                                            selectedPlayer.type === 'ai' ||
+                                            props.playerName ===
+                                                selectedPlayer.name
+                                        )
+                                    }
+                                    playerName={
+                                        selectedPlayer.type === 'human'
+                                            ? selectedPlayer.name
+                                            : 'AI at ' +
+                                              (
+                                                  selectedPlayer.playerId + 1
+                                              ).toString()
+                                    }
+                                    save={(skilledPerks) =>
+                                        setSkilledPerks(skilledPerks)
+                                    }
+                                ></SkillTreeView>
+                            )}
+                    </Grid>
                 </Grid>
             </Box>
         </Box>

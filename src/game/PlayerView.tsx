@@ -53,19 +53,32 @@ const EmptyRow: React.FC<EmptyRowProps> = (props) => {
 
 interface HumanRowProps {
     player: ClientHumanPlayer
+    owner: boolean
+    setSelectedPlayer: (player: ClientHumanPlayer) => void
 }
 
 const HumanRow: React.FC<HumanRowProps> = (props) => {
     return (
         <Grid container>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
                 <LobbyCell
                     label={'Player ' + (props.player.playerId + 1).toString()}
                     backgroundColor={playerColors[props.player.playerId]}
                 ></LobbyCell>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={6}>
                 <LobbyCell label={props.player.name}></LobbyCell>
+            </Grid>
+            <Grid item xs={4}>
+                <button
+                    onClick={() => {
+                        props.setSelectedPlayer(props.player)
+                    }}
+                >
+                    <LobbyCell
+                        label={props.owner ? 'Skilltree' : 'Watch Skilltree'}
+                    ></LobbyCell>
+                </button>
             </Grid>
         </Grid>
     )
@@ -75,12 +88,13 @@ interface AiRowProps {
     player: ClientAiPlayer
     takeSeat: (playerId: number) => void
     clear: (playerId: number) => void
+    setSelectedPlayer: (player: ClientAiPlayer) => void
 }
 
 const AiRow: React.FC<AiRowProps> = (props) => {
     return (
         <Grid container>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
                 <LobbyCell
                     label={'Player ' + (props.player.playerId + 1).toString()}
                     backgroundColor={playerColors[props.player.playerId]}
@@ -89,14 +103,23 @@ const AiRow: React.FC<AiRowProps> = (props) => {
             <Grid item xs={2}>
                 <LobbyCell label={'AI'}></LobbyCell>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
                 <button onClick={() => props.takeSeat(props.player.playerId)}>
                     <LobbyCell label={'Take'}></LobbyCell>
                 </button>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
                 <button onClick={() => props.clear(props.player.playerId)}>
                     <LobbyCell label={'Open'}></LobbyCell>
+                </button>
+            </Grid>
+            <Grid item xs={4}>
+                <button
+                    onClick={() => {
+                        props.setSelectedPlayer(props.player)
+                    }}
+                >
+                    <LobbyCell label={'Skilltree'}></LobbyCell>
                 </button>
             </Grid>
         </Grid>
@@ -104,11 +127,13 @@ const AiRow: React.FC<AiRowProps> = (props) => {
 }
 
 interface DisplayPlayerViewProps {
+    playerName: string | null // playerName of this client
     playerIds: number[]
     players: ClientLobbyPlayer[]
     takeSeat: (playerId: number) => void
     setAi: (playerId: number) => void
     clear: (playerId: number) => void
+    setSelectedPlayer: (player: ClientLobbyPlayer) => void
 }
 
 const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
@@ -133,11 +158,18 @@ const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
                             player={seatedPlayer}
                             takeSeat={props.takeSeat}
                             clear={props.clear}
+                            setSelectedPlayer={props.setSelectedPlayer}
                         ></AiRow>
                     )
                 } else {
                     // if (seatedPlayer.type === 'human') {
-                    return <HumanRow player={seatedPlayer}></HumanRow>
+                    return (
+                        <HumanRow
+                            player={seatedPlayer}
+                            owner={seatedPlayer.name === props.playerName}
+                            setSelectedPlayer={props.setSelectedPlayer}
+                        ></HumanRow>
+                    )
                 }
             })}
         </Grid>

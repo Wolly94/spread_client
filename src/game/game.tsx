@@ -15,6 +15,10 @@ import {
     ClientReplayMessage,
     GetReplayMessage,
 } from 'spread_game/dist/messages/replay/clientReplayMessages'
+import {
+    SkillTree,
+    skillTreeMethods,
+} from 'spread_game/dist/skilltree/skilltree'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
 import authProvider from '../auth/authProvider'
 import MyButton from '../components/MyButton'
@@ -43,6 +47,14 @@ const Game: React.FC<GameProps> = (props) => {
     const [, setRefresh] = React.useState(0)
     const [players, setPlayers] = useState<ClientLobbyPlayer[]>([])
     const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
+    const [skillTree, setSkillTree] = useState<SkillTree | null>(null)
+    const playerName = useMemo(() => {
+        if (playerId !== null) {
+            const pl = players.find((p) => p.playerId === playerId)
+            if (pl !== undefined && pl.type === 'human') return pl.name
+        }
+        return null
+    }, [playerId, players])
 
     const onMessageReceive = useCallback((message: GameServerMessage) => {
         //console.log('message received: ', message)
@@ -52,6 +64,7 @@ const Game: React.FC<GameProps> = (props) => {
                 setPlayers(message.data.players)
                 setMap(message.data.map)
                 setGameSettings(message.data.gameSettings)
+                setSkillTree(skillTreeMethods.fromData(message.data.skillTree))
             } else if (message.type === 'playerid') {
                 console.log('set playerid to ', message.data.playerId)
                 setPlayerId(message.data.playerId)
@@ -110,8 +123,11 @@ const Game: React.FC<GameProps> = (props) => {
             return (
                 <GameLobby
                     map={map}
+                    playerId={playerId}
+                    playerName={playerName}
                     players={players}
                     setMap={setMap}
+                    skillTree={skillTree}
                     sendMessageToServer={(msg) => {
                         if (props.comm.sendMessageToServer !== null)
                             props.comm.sendMessageToServer(msg)
