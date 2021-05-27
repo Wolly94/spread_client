@@ -30,7 +30,10 @@ const GameSettingsView: React.FC<GameSettingsProps> = ({
                 const s: string = e.target.value as string
                 const gameMechs = toGameMechanics(s)
                 if (gameMechs !== null)
-                    props.setGameSettings({ mechanics: gameMechs })
+                    props.setGameSettings({
+                        ...gameSettings,
+                        mechanics: gameMechs,
+                    })
             }}
             style={{ display: 'block' }}
         >
