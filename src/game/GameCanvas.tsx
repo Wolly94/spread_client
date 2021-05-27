@@ -27,6 +27,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [selectedCellIds, setSelectedCellIds] = useState<number[]>([])
     const [mouseDown, setMouseDown] = useState(false)
+    const [currentTime, setCurrentTime] = useState(Date.now())
+    const [oldClientTime, setOldClientTime] = useState(0)
 
     const scaleFactor = useMemo(() => {
         const ratio = Math.min(
@@ -133,25 +135,45 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     // render on canvas
     useEffect(() => {
         if (canvasRef.current != null && clientGameState != null) {
-            const canvas = canvasRef.current
-            canvas.onmousedown = (ev) => onMouseDown(ev)
-            canvas.onmousemove = (ev) => onMouseMove(ev)
-            canvas.onmouseup = (ev) => onMouseUp(ev)
-            const context = canvas.getContext('2d')
-            if (context != null) {
-                context.clearRect(0, 0, props.map.width, props.map.height)
-                clientGameState.cells.forEach((cell) => {
-                    drawEntityScaled(
-                        context,
-                        cell,
-                        selectedCellIds.some((cId) => cId === cell.id),
-                        true,
-                        scaleFactor,
-                    )
-                })
-                clientGameState.bubbles.forEach((bubble) => {
-                    drawEntityScaled(context, bubble, false, true, scaleFactor)
-                })
+            if (clientGameState.timePassedInMs !== oldClientTime) {
+                /*                 const newCurrentTime = Date.now()
+                console.log(
+                    'ms: ' +
+                        (newCurrentTime - currentTime) +
+                        ' expected: ' +
+                        (
+                            clientGameState.timePassedInMs - oldClientTime
+                        ).toString(),
+                )
+                setCurrentTime(newCurrentTime) */
+                setOldClientTime(clientGameState.timePassedInMs)
+
+                const canvas = canvasRef.current
+                canvas.onmousedown = (ev) => onMouseDown(ev)
+                canvas.onmousemove = (ev) => onMouseMove(ev)
+                canvas.onmouseup = (ev) => onMouseUp(ev)
+                const context = canvas.getContext('2d')
+                if (context != null) {
+                    context.clearRect(0, 0, props.map.width, props.map.height)
+                    clientGameState.cells.forEach((cell) => {
+                        drawEntityScaled(
+                            context,
+                            cell,
+                            selectedCellIds.some((cId) => cId === cell.id),
+                            true,
+                            scaleFactor,
+                        )
+                    })
+                    clientGameState.bubbles.forEach((bubble) => {
+                        drawEntityScaled(
+                            context,
+                            bubble,
+                            false,
+                            true,
+                            scaleFactor,
+                        )
+                    })
+                }
             }
         }
     }, [
@@ -164,11 +186,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         playerId,
         props.map,
         scaleFactor,
+        currentTime,
     ])
 
     return (
         <Box>
             <label>Player Id: {playerId}</label>
+            <label>
+                Time passed: {Math.floor(clientGameState.timePassedInMs / 1000)}
+            </label>
             <canvas
                 style={{ border: '1px solid black' }}
                 ref={canvasRef}
