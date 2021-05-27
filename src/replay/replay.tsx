@@ -15,6 +15,7 @@ const Replay: React.FC<ReplayProps> = (props) => {
             new SpreadGameImplementation(
                 props.replay.map,
                 props.replay.gameSettings,
+                props.replay.players,
             ),
         [props],
     )
@@ -23,6 +24,13 @@ const Replay: React.FC<ReplayProps> = (props) => {
     )
     const [runningId, setRunningId] = useState<NodeJS.Timeout | null>(null)
 
+    const stop = useCallback(() => {
+        if (runningId !== null) {
+            clearInterval(runningId)
+            setRunningId(null)
+        }
+    }, [])
+
     const start = useCallback(() => {
         setRunningId(
             setInterval(() => {
@@ -30,23 +38,16 @@ const Replay: React.FC<ReplayProps> = (props) => {
                     (me) => me.timestamp === spreadGame.timePassed,
                 )
                 moves.forEach((mv) => {
-                    if (mv.timestamp === 1900) {
-                        const x = 100
-                    }
                     spreadGame.applyMove(mv.data)
                 })
                 spreadGame.step(minMs)
                 setClientGameState(spreadGame.toClientGameState())
+                if (spreadGame.timePassed >= props.replay.lengthInMs) {
+                    stop()
+                }
             }, minMs),
         )
-    }, [props, spreadGame])
-
-    const stop = () => {
-        if (runningId !== null) {
-            clearInterval(runningId)
-            setRunningId(null)
-        }
-    }
+    }, [props, spreadGame, stop])
 
     useEffect(() => {
         start()
