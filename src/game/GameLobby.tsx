@@ -4,6 +4,7 @@ import {
     ClearSeatMessage,
     ClientLobbyMessage,
     SeatAiMessage,
+    SetAiSkilledPerksMessage,
     SetGameSettingsMessage,
     SetMapMessage,
     SetSkilledPerksMessage,
@@ -124,8 +125,8 @@ const GameLobby: React.FC<GameLobbyProps> = ({
     }
     const setSkilledPerks = useCallback(
         (skills: SkilledPerk[]) => {
-            if (
-                selectedPlayer !== null &&
+            if (selectedPlayer === null) return
+            else if (
                 selectedPlayer.type === 'human' &&
                 selectedPlayer.name === props.playerName
             ) {
@@ -134,7 +135,19 @@ const GameLobby: React.FC<GameLobbyProps> = ({
                     data: skillTreeMethods.toSkilledPerkData(skills),
                 }
                 props.sendMessageToServer(message)
+            } else if (selectedPlayer.type === 'ai') {
+                const message: SetAiSkilledPerksMessage = {
+                    type: 'setaiskilledperks',
+                    data: {
+                        skilledPerkData: skillTreeMethods.toSkilledPerkData(
+                            skills,
+                        ),
+                        playerId: selectedPlayer.playerId,
+                    },
+                }
+                props.sendMessageToServer(message)
             }
+            setSelectedPlayer(null)
         },
         [selectedPlayer],
     )
