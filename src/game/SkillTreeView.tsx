@@ -30,8 +30,10 @@ const PerkView: React.FC<PerkProps> = (props) => {
                         ? undefined
                         : () => {
                               props.incLevel(props.skilledPerk.perk)
-                              props.setReplay(props.skilledPerk.perk.replay)
                           }
+                }
+                onMouseEnter={() =>
+                    props.setReplay(props.skilledPerk.perk.replay)
                 }
             >
                 <Typography variant="h4" component="h5">
@@ -150,18 +152,9 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
                     )
                 })}
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
                 <Box>
                     {replay !== null && <Replay replay={replay}></Replay>}
-                </Box>
-            </Grid>
-            <Grid item xs={12}>
-                <Box width="100%" height="100%">
-                    <canvas
-                        width="100%"
-                        height="100%"
-                        style={{ border: '1px solid black' }}
-                    ></canvas>
                 </Box>
             </Grid>
         </Grid>
