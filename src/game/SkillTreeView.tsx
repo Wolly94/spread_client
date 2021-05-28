@@ -1,5 +1,6 @@
-import { Card, CardActionArea, Grid, Typography } from '@material-ui/core'
+import { Box, Card, CardActionArea, Grid, Typography } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
+import SpreadReplay from 'spread_game/dist/messages/replay/replay'
 import {
     GeneralPerk,
     Skill,
@@ -7,11 +8,13 @@ import {
     SkillTree,
 } from 'spread_game/dist/skilltree/skilltree'
 import MyButton from '../components/MyButton'
+import Replay from '../replay/replay'
 
 interface PerkProps {
     skilledPerk: SkilledPerk
     readonly: boolean
     incLevel: (perk: GeneralPerk) => void
+    setReplay: (replay: SpreadReplay) => void
 }
 
 const PerkView: React.FC<PerkProps> = (props) => {
@@ -25,7 +28,10 @@ const PerkView: React.FC<PerkProps> = (props) => {
                 onClick={
                     props.readonly
                         ? undefined
-                        : () => props.incLevel(props.skilledPerk.perk)
+                        : () => {
+                              props.incLevel(props.skilledPerk.perk)
+                              props.setReplay(props.skilledPerk.perk.replay)
+                          }
                 }
             >
                 <Typography variant="h4" component="h5">
@@ -44,6 +50,7 @@ interface SkillProps {
     skilledPerks: SkilledPerk[]
     readonly: boolean
     incLevel: (perk: GeneralPerk) => void
+    setReplay: (replay: SpreadReplay) => void
 }
 
 const SkillView: React.FC<SkillProps> = (props) => {
@@ -52,17 +59,18 @@ const SkillView: React.FC<SkillProps> = (props) => {
             <Typography variant="h4" component="h3">
                 {props.skill.name}
             </Typography>
-            {props.skill.perks.map((p) => {
+            {props.skill.perks.map((p, key) => {
                 const skilled = props.skilledPerks.find(
                     (sp) => sp.perk.name === p.name,
                 )
                 const level = skilled === undefined ? 0 : skilled.level
                 return (
-                    <Grid item xs={12}>
+                    <Grid item xs={12} key={key}>
                         <PerkView
                             skilledPerk={{ level: level, perk: p }}
                             readonly={props.readonly}
                             incLevel={props.incLevel}
+                            setReplay={(replay) => props.setReplay(replay)}
                         ></PerkView>
                     </Grid>
                 )
@@ -81,6 +89,8 @@ interface SkillTreeProps {
 
 const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
     const [newSkilledPerks, setNewSkilledPerks] = useState<SkilledPerk[]>([])
+    const [replay, setReplay] = useState<SpreadReplay | null>(null)
+
     useEffect(() => {
         setNewSkilledPerks(
             props.skilledPerks.map((sp) => {
@@ -113,30 +123,47 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
 
     return (
         <Grid container>
-            <Typography variant="h4" component="h2">
-                {(props.readonly ? 'Watch Skilltree' : 'Modify Skilltree') +
-                    ' of Player ' +
-                    props.playerName}
-            </Typography>
-            {!props.readonly && (
-                <Grid item>
-                    <MyButton onClick={() => props.save(newSkilledPerks)}>
-                        Save
-                    </MyButton>
-                </Grid>
-            )}
-            {props.skillTree.skills.map((sk) => {
-                return (
-                    <Grid item xs={12}>
-                        <SkillView
-                            skill={sk}
-                            skilledPerks={newSkilledPerks}
-                            readonly={props.readonly}
-                            incLevel={incLevel}
-                        ></SkillView>
+            <Grid item xs={6}>
+                <Typography variant="h4" component="h2">
+                    {(props.readonly ? 'Watch Skilltree' : 'Modify Skilltree') +
+                        ' of Player ' +
+                        props.playerName}
+                </Typography>
+                {!props.readonly && (
+                    <Grid item>
+                        <MyButton onClick={() => props.save(newSkilledPerks)}>
+                            Save
+                        </MyButton>
                     </Grid>
-                )
-            })}
+                )}
+                {props.skillTree.skills.map((sk) => {
+                    return (
+                        <Grid item xs={12}>
+                            <SkillView
+                                skill={sk}
+                                skilledPerks={newSkilledPerks}
+                                readonly={props.readonly}
+                                incLevel={incLevel}
+                                setReplay={(replay) => setReplay(replay)}
+                            ></SkillView>
+                        </Grid>
+                    )
+                })}
+            </Grid>
+            <Grid item xs={6}>
+                <Box>
+                    {replay !== null && <Replay replay={replay}></Replay>}
+                </Box>
+            </Grid>
+            <Grid item xs={12}>
+                <Box width="100%" height="100%">
+                    <canvas
+                        width="100%"
+                        height="100%"
+                        style={{ border: '1px solid black' }}
+                    ></canvas>
+                </Box>
+            </Grid>
         </Grid>
     )
 }

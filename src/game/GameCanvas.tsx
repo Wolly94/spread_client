@@ -187,6 +187,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         props.map,
         scaleFactor,
         currentTime,
+        oldClientTime,
     ])
 
     return (
