@@ -8,73 +8,76 @@ export const neutralColor = 'grey'
 export const selectedColor = 'black'
 export const playerColors = ['blue', 'red', 'green', 'yellow']
 
-export const drawEntity = (
+const drawCircle = (
     context: CanvasRenderingContext2D,
-    obj: ClientCell | ClientBubble | MapCell,
-    selected: boolean,
-    renderUnitCount: boolean,
+    center: [number, number],
+    radius: number,
+    fillColor?: string,
+    outline?: {
+        color: string
+        width: number
+    },
+    text?: {
+        value: string
+        fontSize: number
+    },
 ) => {
-    // draw circle
     context.beginPath()
-    context.fillStyle =
-        obj.playerId != null ? playerColors[obj.playerId] : neutralColor
-    context.strokeStyle = selectedColor
-    context.lineWidth = selected ? 10 : 0
-    context.arc(obj.position[0], obj.position[1], obj.radius, 0, 2 * Math.PI)
-    context.stroke()
-    context.fill()
+    if (fillColor) context.fillStyle = fillColor
+    if (outline) {
+        context.strokeStyle = outline.color
+        context.lineWidth = outline.width
+    }
+    context.arc(center[0], center[1], radius, 0, 2 * Math.PI)
+    if (outline) context.stroke()
+    if (fillColor) context.fill()
 
-    // draw unit count
-    if (renderUnitCount) {
+    if (text) {
         context.lineWidth = 1
         context.fillStyle = 'black'
         context.strokeStyle = 'black'
         context.textBaseline = 'middle'
         context.textAlign = 'center'
-        context.font = '17px Arial'
-        context.fillText(
-            Math.floor(obj.units).toString(),
-            obj.position[0],
-            obj.position[1],
-        )
+        context.font = Math.ceil(text.fontSize).toString() + 'px Arial'
+        context.fillText(text.value, center[0], center[1])
     }
 }
 
-export const drawEntityScaled = (
+export const drawBubble = (
     context: CanvasRenderingContext2D,
-    obj: ClientCell | ClientBubble | MapCell,
-    selected: boolean,
-    renderUnitCount: boolean,
+    bubble: ClientBubble,
     scale: number,
 ) => {
-    // draw circle
-    context.beginPath()
-    context.fillStyle =
-        obj.playerId != null ? playerColors[obj.playerId] : neutralColor
-    context.strokeStyle = selectedColor
-    context.lineWidth = selected ? 10 * scale : 0
-    context.arc(
-        obj.position[0] * scale,
-        obj.position[1] * scale,
-        obj.radius * scale,
-        0,
-        2 * Math.PI,
+    const fillColor =
+        bubble.playerId != null ? playerColors[bubble.playerId] : neutralColor
+    drawCircle(
+        context,
+        [bubble.position[0] * scale, bubble.position[1] * scale],
+        bubble.radius * scale,
+        fillColor,
+        bubble.rage ? { color: 'darkred', width: 5 * scale } : undefined,
+        { value: Math.floor(bubble.units).toString(), fontSize: 17 * scale },
     )
-    context.stroke()
-    context.fill()
-
-    // draw unit count
-    if (renderUnitCount) {
-        context.lineWidth = 1
-        context.fillStyle = 'black'
-        context.strokeStyle = 'black'
-        context.textBaseline = 'middle'
-        context.textAlign = 'center'
-        context.font = Math.ceil(17 * scale).toString() + 'px Arial'
-        context.fillText(
-            Math.floor(obj.units).toString(),
-            obj.position[0] * scale,
-            obj.position[1] * scale,
-        )
-    }
 }
+
+export const drawCell = (
+    context: CanvasRenderingContext2D,
+    cell: ClientCell,
+    selected: boolean,
+    scale: number,
+) => {
+    const fillColor =
+        cell.playerId != null ? playerColors[cell.playerId] : neutralColor
+    drawCircle(
+        context,
+        [cell.position[0] * scale, cell.position[1] * scale],
+        cell.radius * scale,
+        fillColor,
+        selected
+            ? { color: selectedColor, width: 10 * scale }
+            : { color: 'black', width: 1 },
+        { value: Math.floor(cell.units).toString(), fontSize: 17 * scale },
+    )
+}
+
+export const drawMapCell = drawCell

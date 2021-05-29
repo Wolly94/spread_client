@@ -20,6 +20,7 @@ const Replay: React.FC<ReplayProps> = (props) => {
             props.replay.players.map((pl) => playerFromData(pl)),
         ),
     )
+
     const initSpreadGame = useCallback(
         (spreadGame: SpreadGameImplementation) => {
             spreadGameRef.current = spreadGame
@@ -27,6 +28,16 @@ const Replay: React.FC<ReplayProps> = (props) => {
         },
         [],
     )
+
+    useEffect(() => {
+        initSpreadGame(
+            new SpreadGameImplementation(
+                props.replay.map,
+                props.replay.gameSettings,
+                props.replay.players.map((pl) => playerFromData(pl)),
+            ),
+        )
+    }, [initSpreadGame, props.replay])
 
     const [paused, setPaused] = useState(false)
     const [

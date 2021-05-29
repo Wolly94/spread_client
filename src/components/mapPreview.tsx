@@ -1,7 +1,7 @@
 import { Box } from '@material-ui/core'
 import React, { useEffect, useRef } from 'react'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
-import { drawEntityScaled } from '../drawing/draw'
+import { drawMapCell } from '../drawing/draw'
 
 interface MapPreviewProps {
     map: SpreadMap
@@ -22,13 +22,7 @@ const MapPreview: React.FC<MapPreviewProps> = (props) => {
             if (context != null) {
                 context.clearRect(0, 0, props.width, props.height)
                 props.map.cells.forEach((cell) => {
-                    drawEntityScaled(
-                        context,
-                        cell,
-                        false,
-                        true,
-                        1 / scaleFactor,
-                    )
+                    drawMapCell(context, cell, false, 1 / scaleFactor)
                 })
             }
         }

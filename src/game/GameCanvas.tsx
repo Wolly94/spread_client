@@ -10,7 +10,7 @@ import {
 } from 'spread_game/dist/messages/inGame/clientInGameMessage'
 import { entityContainsPoint } from 'spread_game/dist/spreadGame/entites'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
-import { drawEntityScaled } from '../drawing/draw'
+import { drawBubble, drawCell } from '../drawing/draw'
 
 interface GameCanvasProps {
     map: SpreadMap
@@ -156,22 +156,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 if (context != null) {
                     context.clearRect(0, 0, props.map.width, props.map.height)
                     clientGameState.cells.forEach((cell) => {
-                        drawEntityScaled(
+                        drawCell(
                             context,
                             cell,
                             selectedCellIds.some((cId) => cId === cell.id),
-                            true,
                             scaleFactor,
                         )
                     })
                     clientGameState.bubbles.forEach((bubble) => {
-                        drawEntityScaled(
-                            context,
-                            bubble,
-                            false,
-                            true,
-                            scaleFactor,
-                        )
+                        drawBubble(context, bubble, scaleFactor)
                     })
                 }
             }

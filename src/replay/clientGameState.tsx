@@ -2,7 +2,7 @@ import { Box } from '@material-ui/core'
 import React, { useRef, useEffect, useState } from 'react'
 import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
-import { drawEntityScaled } from '../drawing/draw'
+import { drawBubble, drawCell } from '../drawing/draw'
 
 interface ClientGameStateViewProps {
     map: SpreadMap
@@ -40,22 +40,17 @@ const ClientGameStateView: React.FC<ClientGameStateViewProps> = (props) => {
             if (context != null) {
                 context.clearRect(0, 0, bboxSize[0], bboxSize[1])
                 props.state.cells.forEach((cell) => {
-                    drawEntityScaled(
-                        context,
-                        cell,
-                        false,
-                        true,
-                        1 / scaleFactor,
-                    )
+                    drawCell(context, cell, false, 1 / scaleFactor)
                 })
-                props.state.bubbles.forEach((bubbles) => {
-                    drawEntityScaled(
+                props.state.bubbles.forEach((bubble) => {
+                    drawBubble(context, bubble, 1 / scaleFactor)
+                    /*                     drawEntityScaled(
                         context,
-                        bubbles,
+                        bubble,
                         false,
                         true,
                         1 / scaleFactor,
-                    )
+                    ) */
                 })
             }
         }

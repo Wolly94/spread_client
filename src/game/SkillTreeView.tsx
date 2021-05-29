@@ -1,10 +1,10 @@
 import { Box, Card, CardActionArea, Grid, Typography } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
 import SpreadReplay from 'spread_game/dist/messages/replay/replay'
+import { GeneralPerk } from 'spread_game/dist/skilltree/perks/perk'
 import {
-    GeneralPerk,
-    Skill,
     SkilledPerk,
+    Skill,
     SkillTree,
 } from 'spread_game/dist/skilltree/skilltree'
 import MyButton from '../components/MyButton'
@@ -138,9 +138,9 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
                         </MyButton>
                     </Grid>
                 )}
-                {props.skillTree.skills.map((sk) => {
+                {props.skillTree.skills.map((sk, key) => {
                     return (
-                        <Grid item xs={12}>
+                        <Grid item xs={12} key={key}>
                             <SkillView
                                 skill={sk}
                                 skilledPerks={newSkilledPerks}

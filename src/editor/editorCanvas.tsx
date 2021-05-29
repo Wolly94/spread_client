@@ -8,7 +8,7 @@ import {
     updateCellInMap,
     removeCellFromMap,
 } from 'spread_game/dist/spreadGame/map/map'
-import { drawEntity } from '../drawing/draw'
+import { drawMapCell } from '../drawing/draw'
 import EditorForm from './editorForm'
 
 interface MouseDownProps {
@@ -179,10 +179,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
             if (context != null) {
                 context.clearRect(0, 0, width, height)
                 map.cells.forEach((cell) => {
-                    drawEntity(context, cell, false, true)
+                    drawMapCell(context, cell, false, 1)
                 })
                 if (selectedCell != null) {
-                    drawEntity(context, selectedCell, true, true)
+                    drawMapCell(context, selectedCell, true, 1)
                 }
             }
         }
