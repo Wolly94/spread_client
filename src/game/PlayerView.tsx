@@ -140,13 +140,14 @@ const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
     const playerIds = props.playerIds.sort((a, b) => a - b)
     return (
         <Grid container spacing={3}>
-            {playerIds.map((playerId) => {
+            {playerIds.map((playerId, key) => {
                 const seatedPlayer = props.players.find(
                     (pl) => pl.playerId === playerId,
                 )
                 if (seatedPlayer === undefined) {
                     return (
                         <EmptyRow
+                            key={key}
                             playerId={playerId}
                             takeSeat={props.takeSeat}
                             setAi={props.setAi}
@@ -155,6 +156,7 @@ const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
                 } else if (seatedPlayer.type === 'ai') {
                     return (
                         <AiRow
+                            key={key}
                             player={seatedPlayer}
                             takeSeat={props.takeSeat}
                             clear={props.clear}
@@ -165,6 +167,7 @@ const DisplayPlayerView: React.FC<DisplayPlayerViewProps> = (props) => {
                     // if (seatedPlayer.type === 'human') {
                     return (
                         <HumanRow
+                            key={key}
                             player={seatedPlayer}
                             owner={seatedPlayer.name === props.playerName}
                             setSelectedPlayer={props.setSelectedPlayer}
