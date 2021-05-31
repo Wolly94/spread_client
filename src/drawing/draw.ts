@@ -2,6 +2,7 @@ import {
     ClientCell,
     ClientBubble,
 } from 'spread_game/dist/messages/inGame/clientGameState'
+import Bubble from 'spread_game/dist/spreadGame/bubble'
 import { MapCell } from 'spread_game/dist/spreadGame/map/map'
 
 export const neutralColor = 'grey'
@@ -50,12 +51,15 @@ export const drawBubble = (
 ) => {
     const fillColor =
         bubble.playerId != null ? playerColors[bubble.playerId] : neutralColor
+    const additionalAttack = bubble.attackCombatAbilities - 1
     drawCircle(
         context,
         [bubble.position[0] * scale, bubble.position[1] * scale],
         bubble.radius * scale,
         fillColor,
-        bubble.rage ? { color: 'darkred', width: 5 * scale } : undefined,
+        additionalAttack > 0
+            ? { color: 'darkred', width: (additionalAttack * 100) / 5 }
+            : undefined,
         { value: Math.floor(bubble.units).toString(), fontSize: 17 * scale },
     )
 }
