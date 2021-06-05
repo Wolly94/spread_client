@@ -75,7 +75,7 @@ export const drawCell = (
         cell.playerId != null ? playerColors[cell.playerId] : neutralColor
     const additionalDefenseAbilities = cell.defenderCombatAbilities - 1
     const outline = selected
-        ? { color: selectedColor, width: 3 }
+        ? { color: selectedColor, width: 10 * scale }
         : additionalDefenseAbilities > 0
         ? { color: 'darkblue', width: (additionalDefenseAbilities * 100) / 5 }
         : { color: 'black', width: 1 }
@@ -95,6 +95,6 @@ export const drawMapCell = (
     selected: boolean,
     scale: number,
 ) => {
-    const cell: ClientCell = { ...mapCell, defenderCombatAbilities: 0 }
+    const cell: ClientCell = { ...mapCell, defenderCombatAbilities: 1 }
     drawCell(context, cell, selected, scale)
 }
