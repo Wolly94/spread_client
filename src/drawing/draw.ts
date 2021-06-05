@@ -3,6 +3,7 @@ import {
     ClientBubble,
 } from 'spread_game/dist/messages/inGame/clientGameState'
 import Bubble from 'spread_game/dist/spreadGame/bubble'
+import Cell from 'spread_game/dist/spreadGame/cell'
 import { MapCell } from 'spread_game/dist/spreadGame/map/map'
 
 export const neutralColor = 'grey'
@@ -72,16 +73,28 @@ export const drawCell = (
 ) => {
     const fillColor =
         cell.playerId != null ? playerColors[cell.playerId] : neutralColor
+    const additionalDefenseAbilities = cell.defenderCombatAbilities - 1
+    const outline = selected
+        ? { color: selectedColor, width: 3 }
+        : additionalDefenseAbilities > 0
+        ? { color: 'darkblue', width: (additionalDefenseAbilities * 100) / 5 }
+        : { color: 'black', width: 1 }
     drawCircle(
         context,
         [cell.position[0] * scale, cell.position[1] * scale],
         cell.radius * scale,
         fillColor,
-        selected
-            ? { color: selectedColor, width: 10 * scale }
-            : { color: 'black', width: 1 },
+        outline,
         { value: Math.floor(cell.units).toString(), fontSize: 17 * scale },
     )
 }
 
-export const drawMapCell = drawCell
+export const drawMapCell = (
+    context: CanvasRenderingContext2D,
+    mapCell: MapCell,
+    selected: boolean,
+    scale: number,
+) => {
+    const cell: ClientCell = { ...mapCell, defenderCombatAbilities: 0 }
+    drawCell(context, cell, selected, scale)
+}
