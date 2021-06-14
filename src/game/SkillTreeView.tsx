@@ -154,7 +154,9 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
             </Grid>
             <Grid item xs={4}>
                 <Box>
-                    {replay !== null && <Replay replay={replay}></Replay>}
+                    {replay !== null && (
+                        <Replay replay={replay} react={'Restart'}></Replay>
+                    )}
                 </Box>
             </Grid>
         </Grid>

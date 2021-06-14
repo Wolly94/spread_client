@@ -21,7 +21,7 @@ const ReplayView = () => {
             </Grid>
             {replay !== null && (
                 <Grid item xs={12}>
-                    <Replay replay={replay}></Replay>
+                    <Replay replay={replay} react={'Restart'}></Replay>
                 </Grid>
             )}
         </Grid>

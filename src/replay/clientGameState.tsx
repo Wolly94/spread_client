@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core'
+import { Box, Grid } from '@material-ui/core'
 import React, { useRef, useEffect, useState } from 'react'
 import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
 import { SpreadMap } from 'spread_game/dist/spreadGame/map/map'
@@ -17,9 +17,10 @@ const ClientGameStateView: React.FC<ClientGameStateViewProps> = (props) => {
     useEffect(() => {
         const bbox = document.getElementById(bboxName)
         if (bbox !== null && canvasRef.current !== null) {
-            const maxWidth = bbox.offsetWidth
-            const maxHeight = bbox.offsetHeight
+            const maxWidth = Math.min(bbox.offsetWidth, window.innerWidth)
             const whRatio = props.map.height / props.map.width
+            //const maxHeight = Math.min(bbox.offsetHeight, window.innerHeight)
+            const maxHeight = Math.min(whRatio * maxWidth, window.innerHeight)
             const resHeight = maxWidth * whRatio
             const [newWidth, newHeight] =
                 resHeight > maxHeight
@@ -57,19 +58,23 @@ const ClientGameStateView: React.FC<ClientGameStateViewProps> = (props) => {
     }, [props, bboxSize])
 
     return (
-        <Box id={bboxName} width="100%" height="100%">
-            <canvas
-                style={{
-                    border: '1px solid black',
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                }}
-                ref={canvasRef}
-                height={bboxSize[0]}
-                width={bboxSize[1]}
-            />
-        </Box>
+        <Grid container>
+            <Grid item xs={12}>
+                <Box id={bboxName} width="100%" height="100%">
+                    <canvas
+                        style={{
+                            border: '1px solid black',
+                            position: 'relative',
+                            //width: '100%',
+                            //height: '100%',
+                        }}
+                        ref={canvasRef}
+                        height={bboxSize[1]}
+                        width={bboxSize[0]}
+                    />
+                </Box>
+            </Grid>
+        </Grid>
     )
 }
 

@@ -5,111 +5,71 @@ import SpreadReplay from 'spread_game/dist/messages/replay/replay'
 import { SpreadGameImplementation } from 'spread_game/dist/spreadGame'
 import { playerFromData } from 'spread_game/dist/spreadGame/player'
 import ClientGameStateView from './clientGameState'
-import useInterval from './loop'
+import useInterval from './../hooks/useInterval'
 
 interface ReplayProps {
     replay: SpreadReplay
+    react: 'Restart' | 'Stop'
 }
 
-const Replay: React.FC<ReplayProps> = (props) => {
-    const [changeSpreadGame, setChangeSpreadGame] = useState<number>(0)
-    const spreadGameRef = useRef<SpreadGameImplementation>(
-        new SpreadGameImplementation(
-            props.replay.map,
-            props.replay.gameSettings,
-            props.replay.players.map((pl) => playerFromData(pl)),
-        ),
-    )
-
-    const initSpreadGame = useCallback(
-        (spreadGame: SpreadGameImplementation) => {
-            spreadGameRef.current = spreadGame
-            setChangeSpreadGame((changeSpreadGame) => changeSpreadGame + 1)
-        },
-        [],
-    )
-
-    useEffect(() => {
-        initSpreadGame(
-            new SpreadGameImplementation(
-                props.replay.map,
-                props.replay.gameSettings,
-                props.replay.players.map((pl) => playerFromData(pl)),
-            ),
-        )
-    }, [initSpreadGame, props.replay])
-
-    const [paused, setPaused] = useState(false)
+const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
     const [
         clientGameState,
         setClientGameState,
-    ] = useState<ClientGameState | null>(
-        spreadGameRef.current.toClientGameState(),
-    )
+    ] = useState<ClientGameState | null>(null)
+    const spreadGameRef = useRef<SpreadGameImplementation | null>(null)
+
+    const resetGame = useCallback(() => {
+        spreadGameRef.current = new SpreadGameImplementation(
+            replay.map,
+            replay.gameSettings,
+            replay.players.map((pl) => playerFromData(pl)),
+        )
+    }, [replay])
+
+    useEffect(() => {
+        resetGame()
+    }, [replay, resetGame])
+
     const callback = useCallback(() => {
-        const moves = props.replay.moveHistory.filter(
-            (me) => me.timestamp === spreadGameRef.current.timePassed,
-        )
-        moves.forEach((mv) => {
-            spreadGameRef.current.applyMove(mv.data)
-        })
-        // TODO scale by watch speed factor!
-        spreadGameRef.current.step(
-            spreadGameRef.current.gameSettings.updateFrequencyInMs,
-        )
-        setClientGameState(spreadGameRef.current.toClientGameState())
-        if (spreadGameRef.current.timePassed >= props.replay.lengthInMs)
-            setPaused(true)
-    }, [props])
+        if (spreadGameRef.current !== null) {
+            // TODO scale by watch speed factor!
+            spreadGameRef.current.runReplay(
+                replay,
+                replay.gameSettings.updateFrequencyInMs,
+            )
+            setClientGameState(spreadGameRef.current.toClientGameState())
+        }
+    }, [replay])
 
-    const [isRunning, start, stop] = useInterval(
+    const [paused, start, stop] = useInterval(
         callback,
-        props.replay.gameSettings.updateFrequencyInMs,
+        replay.gameSettings.updateFrequencyInMs,
     )
 
-    const restart = useCallback(() => {
-        initSpreadGame(
-            new SpreadGameImplementation(
-                props.replay.map,
-                props.replay.gameSettings,
-                props.replay.players.map((pl) => playerFromData(pl)),
-            ),
-        )
-        setPaused(false)
-    }, [initSpreadGame, props])
-
     useEffect(() => {
-        if (spreadGameRef.current.timePassed >= props.replay.lengthInMs) {
-            stop()
-            restart()
+        if (
+            clientGameState !== null &&
+            clientGameState.timePassedInMs >= replay.lengthInMs
+        ) {
+            if (props.react === 'Restart') {
+                resetGame()
+            } else if (props.react === 'Stop') {
+                stop()
+            }
         }
-        return () => stop()
-    }, [
-        restart,
-        initSpreadGame,
-        changeSpreadGame,
-        clientGameState,
-        props.replay.lengthInMs,
-        start,
-        stop,
-    ])
+    }, [replay.lengthInMs, resetGame, stop, props.react, clientGameState])
 
     useEffect(() => {
-        if (!isRunning && !paused) {
-            start()
-        }
-        return () => stop()
-    }, [start, stop, paused, isRunning])
-
-    useEffect(() => {
-        if (paused) stop()
-    }, [paused, stop])
+        start()
+        const x = 10
+    }, [start]) // since start never changes, this will only be executed on first render
 
     return (
         <Box>
             {clientGameState !== null && (
                 <ClientGameStateView
-                    map={props.replay.map}
+                    map={replay.map}
                     state={clientGameState}
                 ></ClientGameStateView>
             )}

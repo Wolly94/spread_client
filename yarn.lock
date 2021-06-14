@@ -10783,7 +10783,7 @@
     "extend-shallow" "^3.0.0"
 
 "spread_game@github:Wolly94/spread_game":
-  "resolved" "git+ssh://git@github.com/Wolly94/spread_game.git#c7231971548c38a59be00b115a762fe6ad4086b5"
+  "resolved" "git+ssh://git@github.com/Wolly94/spread_game.git#88a40be1fbd6ebf0344efeab4d868047ef1eaed9"
   "version" "1.0.0"
   dependencies:
     "@babel/core" "^7.14.3"
