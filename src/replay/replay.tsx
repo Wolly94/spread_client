@@ -8,6 +8,7 @@ import ClientGameStateView from './clientGameState'
 import useInterval from './../hooks/useInterval'
 import { ControlBar } from './controlBar'
 import MyButton from '../components/MyButton'
+import { perkFromBackUp } from 'spread_game/dist/skilltree'
 
 interface ReplayProps {
     replay: SpreadReplay
@@ -26,6 +27,11 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
             replay.map,
             replay.gameSettings,
             replay.players.map((pl) => playerFromData(pl)),
+            replay.perks.flatMap((p) => {
+                const r = perkFromBackUp(p)
+                if (r === null) return []
+                else return [r]
+            }),
         )
     }, [replay])
 
@@ -42,11 +48,11 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
     const stepCallback = useCallback(() => {
         if (spreadGameRef.current !== null) {
             // TODO scale by watch speed factor!
+            updateScreen()
             spreadGameRef.current.runReplay(
                 replay,
                 replay.gameSettings.updateFrequencyInMs,
             )
-            updateScreen()
         }
     }, [replay, updateScreen])
 
@@ -76,7 +82,7 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
         <Box paddingLeft={5} paddingRight={5} paddingTop={5}>
             {clientGameState !== null && (
                 <Grid container spacing={1}>
-                    <Grid item xs={3}>
+                    <Grid item xs={12}>
                         <Grid container>
                             <Grid item xs={6}>
                                 <Button
@@ -119,7 +125,7 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                         <ClientGameStateView
                             map={replay.map}
                             state={clientGameState}

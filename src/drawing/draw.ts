@@ -1,10 +1,5 @@
-import {
-    ClientCell,
-    ClientBubble,
-} from 'spread_game/dist/messages/inGame/clientGameState'
-import Bubble from 'spread_game/dist/spreadGame/bubble'
-import Cell from 'spread_game/dist/spreadGame/cell'
-import { MapCell } from 'spread_game/dist/spreadGame/map/map'
+import { ClientBubble, ClientCell } from "spread_game/dist/messages/inGame/clientGameState"
+import { MapCell } from "spread_game/dist/spreadGame/map/map"
 
 export const neutralColor = 'grey'
 export const selectedColor = 'black'
@@ -52,14 +47,14 @@ export const drawBubble = (
 ) => {
     const fillColor =
         bubble.playerId != null ? playerColors[bubble.playerId] : neutralColor
-    const additionalAttack = bubble.attackCombatAbilities - 1
+    const additionalAttack = bubble.attackCombatAbilities
     drawCircle(
         context,
         [bubble.position[0] * scale, bubble.position[1] * scale],
         bubble.radius * scale,
         fillColor,
         additionalAttack > 0
-            ? { color: 'darkred', width: (additionalAttack * 100) / 5 }
+            ? { color: 'darkred', width: additionalAttack / 5 }
             : undefined,
         { value: Math.floor(bubble.units).toString(), fontSize: 17 * scale },
     )
@@ -73,11 +68,11 @@ export const drawCell = (
 ) => {
     const fillColor =
         cell.playerId != null ? playerColors[cell.playerId] : neutralColor
-    const additionalDefenseAbilities = cell.defenderCombatAbilities - 1
+    const additionalDefenseAbilities = cell.defenderCombatAbilities
     const outline = selected
         ? { color: selectedColor, width: 10 * scale }
         : additionalDefenseAbilities > 0
-        ? { color: 'darkblue', width: (additionalDefenseAbilities * 100) / 5 }
+        ? { color: 'darkblue', width: additionalDefenseAbilities / 5 }
         : { color: 'black', width: 1 }
     drawCircle(
         context,
@@ -95,6 +90,11 @@ export const drawMapCell = (
     selected: boolean,
     scale: number,
 ) => {
-    const cell: ClientCell = { ...mapCell, defenderCombatAbilities: 1 }
+    const cell: ClientCell = {
+        ...mapCell,
+        defenderCombatAbilities: 0,
+        attackerCombatAbilities: 0,
+        membraneValue: 0,
+    }
     drawCell(context, cell, selected, scale)
 }

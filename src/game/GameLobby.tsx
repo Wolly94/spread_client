@@ -149,7 +149,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
             }
             setSelectedPlayer(null)
         },
-        [selectedPlayer],
+        [selectedPlayer, props],
     )
 
     return (

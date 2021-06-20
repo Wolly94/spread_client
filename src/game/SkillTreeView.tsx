@@ -1,6 +1,7 @@
 import { Box, Card, CardActionArea, Grid, Typography } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
 import SpreadReplay from 'spread_game/dist/messages/replay/replay'
+import { getPerkReplay } from 'spread_game/dist/skilltree'
 import { GeneralPerk } from 'spread_game/dist/skilltree/perks/perk'
 import {
     SkilledPerk,
@@ -9,6 +10,7 @@ import {
 } from 'spread_game/dist/skilltree/skilltree'
 import MyButton from '../components/MyButton'
 import Replay from '../replay/replay'
+import SimpleTabs, { TabProps } from './Tabs'
 
 interface PerkProps {
     skilledPerk: SkilledPerk
@@ -32,15 +34,18 @@ const PerkView: React.FC<PerkProps> = (props) => {
                               props.incLevel(props.skilledPerk.perk)
                           }
                 }
-                onMouseEnter={() =>
-                    props.setReplay(props.skilledPerk.perk.replay)
-                }
+                onMouseEnter={() => {
+                    const rep = getPerkReplay(props.skilledPerk.perk)
+                    if (rep !== null) props.setReplay(rep)
+                }}
             >
                 <Typography variant="h4" component="h5">
                     {props.skilledPerk.perk.name + ' ' + skilledText}
                 </Typography>
-                <Typography variant="h4" component="h6">
-                    {props.skilledPerk.perk.description}
+                <Typography variant="h6" component="h6">
+                    {props.skilledPerk.perk.description(
+                        props.skilledPerk.level,
+                    )}
                 </Typography>
             </CardActionArea>
         </Card>
@@ -58,9 +63,9 @@ interface SkillProps {
 const SkillView: React.FC<SkillProps> = (props) => {
     return (
         <Grid container>
-            <Typography variant="h4" component="h3">
+{/*             <Typography variant="h4" component="h3">
                 {props.skill.name}
-            </Typography>
+            </Typography> */}
             {props.skill.perks.map((p, key) => {
                 const skilled = props.skilledPerks.find(
                     (sp) => sp.perk.name === p.name,
@@ -138,21 +143,30 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
                         </MyButton>
                     </Grid>
                 )}
-                {props.skillTree.skills.map((sk, key) => {
-                    return (
-                        <Grid item xs={12} key={key}>
-                            <SkillView
-                                skill={sk}
-                                skilledPerks={newSkilledPerks}
-                                readonly={props.readonly}
-                                incLevel={incLevel}
-                                setReplay={(replay) => setReplay(replay)}
-                            ></SkillView>
-                        </Grid>
-                    )
-                })}
+                <Grid item xs={12}>
+                    <SimpleTabs
+                        tabs={props.skillTree.skills.map(
+                            (sk): TabProps => {
+                                return {
+                                    label: sk.name,
+                                    child: (
+                                        <SkillView
+                                            skill={sk}
+                                            skilledPerks={newSkilledPerks}
+                                            readonly={props.readonly}
+                                            incLevel={incLevel}
+                                            setReplay={(replay) =>
+                                                setReplay(replay)
+                                            }
+                                        ></SkillView>
+                                    ),
+                                }
+                            },
+                        )}
+                    ></SimpleTabs>
+                </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
                 <Box>
                     {replay !== null && (
                         <Replay replay={replay} react={'Restart'}></Replay>
