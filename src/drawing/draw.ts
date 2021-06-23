@@ -50,26 +50,25 @@ export const drawBubble = (
 ) => {
     const fillColor =
         bubble.playerId != null ? playerColors[bubble.playerId] : neutralColor
-    if (bubble.data === null) return
-    const additionalAttack = bubble.data.attackCombatAbilities
+    const additionalAttack = bubble.attackCombatAbilities
     drawCircle(
         context,
-        [bubble.data.position[0] * scale, bubble.data.position[1] * scale],
-        bubble.data.radius * scale,
+        [bubble.position[0] * scale, bubble.position[1] * scale],
+        bubble.radius * scale,
         fillColor,
         additionalAttack > 0
             ? { color: 'darkred', width: additionalAttack / 5 }
             : undefined,
         {
-            value: Math.floor(bubble.data.units).toString(),
+            value: Math.floor(bubble.units).toString(),
             fontSize: 17 * scale,
         },
     )
     if (bubble.infected) {
         drawCircle(
             context,
-            [bubble.data.position[0] * scale, bubble.data.position[1] * scale],
-            (bubble.data.radius * scale) / 5,
+            [bubble.position[0] * scale, bubble.position[1] * scale],
+            (bubble.radius * scale) / 5,
             'darkgreen',
             undefined,
             undefined,
@@ -111,8 +110,22 @@ export const drawCell = (
             [cell.position[0] * scale, cell.position[1] * scale],
             (cell.radius * scale) / 5,
             'darkgreen',
+        )
+    }
+    if (cell.data !== null && cell.playerId !== null) {
+        drawCircle(
+            context,
+            [cell.position[0] * scale, cell.position[1] * scale],
+            cell.data.newBubbleRadius * scale,
             undefined,
+            { color: 'black', width: 2 },
+        )
+        drawCircle(
+            context,
+            [cell.position[0] * scale, cell.position[1] * scale],
+            cell.data.currentUnitsRadius * scale,
             undefined,
+            { color: 'black', width: 2 * scale },
         )
     }
 }
@@ -130,6 +143,8 @@ export const drawMapCell = (
             attackerCombatAbilities: 0,
             membraneValue: 0,
             units: mapCell.units,
+            currentUnitsRadius: 0,
+            newBubbleRadius: 0,
         },
         infected: false,
     }
