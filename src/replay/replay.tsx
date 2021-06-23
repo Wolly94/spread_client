@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core'
+import { Box, Button, Grid, Input } from '@material-ui/core'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
 import SpreadReplay from 'spread_game/dist/messages/replay/replay'
@@ -53,11 +53,11 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
     const stepCallback = useCallback(() => {
         if (spreadGameRef.current !== null) {
             // TODO scale by watch speed factor!
-            updateScreen()
             spreadGameRef.current.runReplay(
                 replay,
                 replay.gameSettings.updateFrequencyInMs,
             )
+            updateScreen()
         }
     }, [replay, updateScreen])
 
@@ -65,6 +65,27 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
         stepCallback,
         replay.gameSettings.updateFrequencyInMs,
     )
+
+    const setTime = useCallback(
+        (newTimePassedInMs: number) => {
+            stop()
+            resetGame()
+            if (spreadGameRef.current !== null) {
+                spreadGameRef.current.runReplay(replay, newTimePassedInMs)
+            }
+            updateScreen()
+        },
+        [stop, resetGame, replay, updateScreen],
+    )
+
+    const stepBackCallback = useCallback(() => {
+        if (spreadGameRef.current !== null) {
+            const newTime =
+                spreadGameRef.current.timePassed -
+                replay.gameSettings.updateFrequencyInMs
+            setTime(Math.max(newTime, 0))
+        }
+    }, [setTime, replay.gameSettings.updateFrequencyInMs])
 
     useEffect(() => {
         if (
@@ -83,13 +104,22 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
         start()
     }, [start]) // since start never changes, this will only be executed on first render
 
+    const handleInputChange = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const time =
+                event.target.value === '' ? 0 : Number(event.target.value)
+            setTime(time)
+        },
+        [setTime],
+    )
+
     return (
         <Box paddingLeft={5} paddingRight={5} paddingTop={5}>
             {clientGameState !== null && (
                 <Grid container spacing={1}>
                     <Grid item xs={12}>
                         <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                                 <Button
                                     onClick={() => {
                                         if (paused) start()
@@ -99,7 +129,7 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                                     {paused ? 'Run' : 'Pause'}
                                 </Button>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                                 <Button
                                     disabled={!paused}
                                     onClick={() => {
@@ -109,23 +139,46 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                                     Step
                                 </Button>
                             </Grid>
+                            <Grid item xs={3}>
+                                <Button
+                                    disabled={!paused}
+                                    onClick={() => {
+                                        stepBackCallback()
+                                    }}
+                                >
+                                    Step Back
+                                </Button>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Input
+                                    //className={classes.input}
+                                    disabled={!paused}
+                                    value={
+                                        spreadGameRef.current !== null &&
+                                        !paused
+                                            ? spreadGameRef.current.timePassed /
+                                              1000
+                                            : 0
+                                    }
+                                    margin="dense"
+                                    onChange={handleInputChange}
+                                    //onBlur={handleBlur}
+                                    inputProps={{
+                                        step: 10,
+                                        min: 0,
+                                        max: 100,
+                                        type: 'number',
+                                        'aria-labelledby': 'input-slider',
+                                    }}
+                                />
+                            </Grid>
                             <Grid item xs={12}>
                                 <ControlBar
                                     maxLengthInMs={replay.lengthInMs}
                                     timePassedInMs={
                                         clientGameState.timePassedInMs
                                     }
-                                    setTime={(newTimePassedInMs) => {
-                                        stop()
-                                        resetGame()
-                                        if (spreadGameRef.current !== null) {
-                                            spreadGameRef.current.runReplay(
-                                                replay,
-                                                newTimePassedInMs,
-                                            )
-                                        }
-                                        updateScreen()
-                                    }}
+                                    setTime={setTime}
                                 ></ControlBar>
                             </Grid>
                         </Grid>
