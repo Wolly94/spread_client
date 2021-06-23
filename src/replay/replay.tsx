@@ -53,7 +53,7 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
             )
             updateScreen(true)
         }
-    }, [replay, updateScreen, clientGameState])
+    }, [replay, updateScreen])
 
     const [paused, start, stop] = useInterval(
         stepCallback,
