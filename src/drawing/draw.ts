@@ -1,5 +1,8 @@
-import { ClientBubble, ClientCell } from "spread_game/dist/messages/inGame/clientGameState"
-import { MapCell } from "spread_game/dist/spreadGame/map/map"
+import {
+    ClientBubble,
+    ClientCell,
+} from 'spread_game/dist/messages/inGame/clientGameState'
+import { MapCell } from 'spread_game/dist/spreadGame/map/map'
 
 export const neutralColor = 'grey'
 export const selectedColor = 'black'
@@ -47,17 +50,31 @@ export const drawBubble = (
 ) => {
     const fillColor =
         bubble.playerId != null ? playerColors[bubble.playerId] : neutralColor
-    const additionalAttack = bubble.attackCombatAbilities
+    if (bubble.data === null) return
+    const additionalAttack = bubble.data.attackCombatAbilities
     drawCircle(
         context,
-        [bubble.position[0] * scale, bubble.position[1] * scale],
-        bubble.radius * scale,
+        [bubble.data.position[0] * scale, bubble.data.position[1] * scale],
+        bubble.data.radius * scale,
         fillColor,
         additionalAttack > 0
             ? { color: 'darkred', width: additionalAttack / 5 }
             : undefined,
-        { value: Math.floor(bubble.units).toString(), fontSize: 17 * scale },
+        {
+            value: Math.floor(bubble.data.units).toString(),
+            fontSize: 17 * scale,
+        },
     )
+    if (bubble.infected) {
+        drawCircle(
+            context,
+            [bubble.data.position[0] * scale, bubble.data.position[1] * scale],
+            (bubble.data.radius * scale) / 5,
+            'darkgreen',
+            undefined,
+            undefined,
+        )
+    }
 }
 
 export const drawCell = (
@@ -68,7 +85,8 @@ export const drawCell = (
 ) => {
     const fillColor =
         cell.playerId != null ? playerColors[cell.playerId] : neutralColor
-    const additionalDefenseAbilities = cell.defenderCombatAbilities
+    const additionalDefenseAbilities =
+        cell.data === null ? 0 : cell.data.defenderCombatAbilities
     const outline = selected
         ? { color: selectedColor, width: 10 * scale }
         : additionalDefenseAbilities > 0
@@ -80,8 +98,23 @@ export const drawCell = (
         cell.radius * scale,
         fillColor,
         outline,
-        { value: Math.floor(cell.units).toString(), fontSize: 17 * scale },
+        cell.data === null
+            ? undefined
+            : {
+                  value: Math.floor(cell.data.units).toString(),
+                  fontSize: 17 * scale,
+              },
     )
+    if (cell.infected) {
+        drawCircle(
+            context,
+            [cell.position[0] * scale, cell.position[1] * scale],
+            (cell.radius * scale) / 5,
+            'darkgreen',
+            undefined,
+            undefined,
+        )
+    }
 }
 
 export const drawMapCell = (
@@ -92,9 +125,13 @@ export const drawMapCell = (
 ) => {
     const cell: ClientCell = {
         ...mapCell,
-        defenderCombatAbilities: 0,
-        attackerCombatAbilities: 0,
-        membraneValue: 0,
+        data: {
+            defenderCombatAbilities: 0,
+            attackerCombatAbilities: 0,
+            membraneValue: 0,
+            units: mapCell.units,
+        },
+        infected: false,
     }
     drawCell(context, cell, selected, scale)
 }

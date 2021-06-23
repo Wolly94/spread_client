@@ -13,6 +13,7 @@ import { perkFromBackUp } from 'spread_game/dist/skilltree'
 interface ReplayProps {
     replay: SpreadReplay
     react: 'Restart' | 'Stop'
+    perspectivePlayerId: number | null
 }
 
 const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
@@ -37,9 +38,13 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
 
     const updateScreen = useCallback(() => {
         if (spreadGameRef.current !== null) {
-            setClientGameState(spreadGameRef.current.toClientGameState())
+            setClientGameState(
+                spreadGameRef.current.toClientGameState(
+                    props.perspectivePlayerId,
+                ),
+            )
         }
-    }, [])
+    }, [props.perspectivePlayerId])
 
     useEffect(() => {
         resetGame()

@@ -40,6 +40,10 @@ const ClientGameStateView: React.FC<ClientGameStateViewProps> = (props) => {
             const context = canvasRef.current.getContext('2d')
             if (context != null) {
                 context.clearRect(0, 0, bboxSize[0], bboxSize[1])
+                if (props.state.deadlyEnvironment) {
+                    context.fillStyle = 'grey'
+                    context.fillRect(0, 0, bboxSize[0], bboxSize[1])
+                }
                 props.state.cells.forEach((cell) => {
                     drawCell(context, cell, false, 1 / scaleFactor)
                 })

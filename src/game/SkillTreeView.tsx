@@ -63,7 +63,7 @@ interface SkillProps {
 const SkillView: React.FC<SkillProps> = (props) => {
     return (
         <Grid container>
-{/*             <Typography variant="h4" component="h3">
+            {/*             <Typography variant="h4" component="h3">
                 {props.skill.name}
             </Typography> */}
             {props.skill.perks.map((p, key) => {
@@ -169,7 +169,11 @@ const SkillTreeView: React.FC<SkillTreeProps> = (props) => {
             <Grid item xs={6}>
                 <Box>
                     {replay !== null && (
-                        <Replay replay={replay} react={'Restart'}></Replay>
+                        <Replay
+                            replay={replay}
+                            react={'Restart'}
+                            perspectivePlayerId={0}
+                        ></Replay>
                     )}
                 </Box>
             </Grid>
