@@ -3,12 +3,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { ClientGameState } from 'spread_game/dist/messages/inGame/clientGameState'
 import SpreadReplay from 'spread_game/dist/messages/replay/replay'
 import { SpreadGameImplementation } from 'spread_game/dist/spreadGame'
-import { playerFromData } from 'spread_game/dist/spreadGame/player'
-import ClientGameStateView from './clientGameState'
 import useInterval from './../hooks/useInterval'
+import ClientGameStateView from './clientGameState'
 import { ControlBar } from './controlBar'
-import MyButton from '../components/MyButton'
-import { perkFromBackUp } from 'spread_game/dist/skilltree'
 
 interface ReplayProps {
     replay: SpreadReplay
@@ -22,29 +19,26 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
         setClientGameState,
     ] = useState<ClientGameState | null>(null)
     const spreadGameRef = useRef<SpreadGameImplementation | null>(null)
+    const [enterTimePassed, setEnterTimePassed] = useState(0)
+    const updateScreen = useCallback(
+        (updateEnterTime: boolean) => {
+            if (spreadGameRef.current !== null) {
+                const clientState = spreadGameRef.current.toClientGameState(
+                    props.perspectivePlayerId,
+                )
+                setClientGameState(clientState)
+                if (updateEnterTime)
+                    setEnterTimePassed(clientState.timePassedInMs / 1000)
+            }
+        },
+        [props.perspectivePlayerId],
+    )
 
     const resetGame = useCallback(() => {
-        spreadGameRef.current = new SpreadGameImplementation(
-            replay.map,
-            replay.gameSettings,
-            replay.players.map((pl) => playerFromData(pl)),
-            replay.perks.flatMap((p) => {
-                const r = perkFromBackUp(p)
-                if (r === null) return []
-                else return [r]
-            }),
-        )
-    }, [replay])
-
-    const updateScreen = useCallback(() => {
-        if (spreadGameRef.current !== null) {
-            setClientGameState(
-                spreadGameRef.current.toClientGameState(
-                    props.perspectivePlayerId,
-                ),
-            )
-        }
-    }, [props.perspectivePlayerId])
+        const game = SpreadGameImplementation.fromReplay(replay)
+        spreadGameRef.current = game
+        updateScreen(false)
+    }, [replay, updateScreen])
 
     useEffect(() => {
         resetGame()
@@ -57,9 +51,9 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                 replay,
                 replay.gameSettings.updateFrequencyInMs,
             )
-            updateScreen()
+            updateScreen(true)
         }
-    }, [replay, updateScreen])
+    }, [replay, updateScreen, clientGameState])
 
     const [paused, start, stop] = useInterval(
         stepCallback,
@@ -67,13 +61,13 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
     )
 
     const setTime = useCallback(
-        (newTimePassedInMs: number) => {
+        (newTimePassedInMs: number, updateEnterTime: boolean) => {
             stop()
             resetGame()
             if (spreadGameRef.current !== null) {
                 spreadGameRef.current.runReplay(replay, newTimePassedInMs)
             }
-            updateScreen()
+            updateScreen(updateEnterTime)
         },
         [stop, resetGame, replay, updateScreen],
     )
@@ -83,7 +77,7 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
             const newTime =
                 spreadGameRef.current.timePassed -
                 replay.gameSettings.updateFrequencyInMs
-            setTime(Math.max(newTime, 0))
+            setTime(Math.max(newTime, 0), true)
         }
     }, [setTime, replay.gameSettings.updateFrequencyInMs])
 
@@ -108,7 +102,8 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
         (event: React.ChangeEvent<HTMLInputElement>) => {
             const time =
                 event.target.value === '' ? 0 : Number(event.target.value)
-            setTime(time)
+            setTime(time * 1000, false)
+            setEnterTimePassed(time)
         },
         [setTime],
     )
@@ -153,20 +148,14 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                                 <Input
                                     //className={classes.input}
                                     disabled={!paused}
-                                    value={
-                                        spreadGameRef.current !== null &&
-                                        !paused
-                                            ? spreadGameRef.current.timePassed /
-                                              1000
-                                            : 0
-                                    }
+                                    value={enterTimePassed}
                                     margin="dense"
                                     onChange={handleInputChange}
                                     //onBlur={handleBlur}
                                     inputProps={{
-                                        step: 10,
+                                        step: 0.1,
                                         min: 0,
-                                        max: 100,
+                                        max: replay.lengthInMs / 1000,
                                         type: 'number',
                                         'aria-labelledby': 'input-slider',
                                     }}
@@ -178,7 +167,9 @@ const Replay: React.FC<ReplayProps> = ({ replay, ...props }) => {
                                     timePassedInMs={
                                         clientGameState.timePassedInMs
                                     }
-                                    setTime={setTime}
+                                    setTime={(newTime) => {
+                                        setTime(newTime, true)
+                                    }}
                                 ></ControlBar>
                             </Grid>
                         </Grid>
