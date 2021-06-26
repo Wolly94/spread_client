@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core'
+import { Box, Grid } from '@material-ui/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
     ClientGameState,
@@ -184,18 +184,23 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     ])
 
     return (
-        <Box>
-            <label>Player Id: {playerId}</label>
-            <label>
-                Time passed: {Math.floor(clientGameState.timePassedInMs / 1000)}
-            </label>
-            <canvas
-                style={{ border: '1px solid black' }}
-                ref={canvasRef}
-                height={props.map.height * scaleFactor}
-                width={props.map.width * scaleFactor}
-            />
-        </Box>
+        <Grid container>
+            <Grid item xs={12}>
+                <canvas
+                    style={{ border: '1px solid black' }}
+                    ref={canvasRef}
+                    height={props.map.height * scaleFactor}
+                    width={props.map.width * scaleFactor}
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <label>Player Id: {playerId}</label>
+                <label>
+                    Time passed:{' '}
+                    {Math.floor(clientGameState.timePassedInMs / 1000)}
+                </label>
+            </Grid>
+        </Grid>
     )
 }
 
