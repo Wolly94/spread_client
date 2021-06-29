@@ -3,7 +3,7 @@ import React, { useRef } from 'react'
 import MyButton from './components/MyButton'
 
 interface ReadFileProps {
-    handleInput: (data: string) => void
+    handleInput: (data: string, fileName: string) => void
     allowedFileEndings: string[]
     children: string
 }
@@ -24,7 +24,7 @@ export const ReadFile: React.FC<ReadFileProps> = (props) => {
             if (evt.target == null) return
             if (evt.target.result == null) return
             const data = evt.target.result
-            props.handleInput(data.toString())
+            props.handleInput(data.toString(), file.name)
         }
         inputFileRef.current.value = ''
     }
